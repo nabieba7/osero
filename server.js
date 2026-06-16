@@ -414,6 +414,21 @@ function _saveOnlineGameResult(room, blackCount, whiteCount) {
   }
 }
 
+// Graceful shutdown for Railway
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT received, shutting down gracefully');
+  server.close(() => {
+    process.exit(0);
+  });
+});
+
 server.listen(PORT, () => {
   console.log(`Osero server running on http://localhost:${PORT}`);
 });
