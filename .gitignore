@@ -1,18 +1,9 @@
-# Dependencies
 node_modules/
-
-# Database (contains user data - NEVER commit)
 osero.db
 osero.db-shm
 osero.db-wal
-
-# OS files
 .DS_Store
 Thumbs.db
-
-# Logs
 *.log
 npm-debug.log*
-
-# Environment
 .env
