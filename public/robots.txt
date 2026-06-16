@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://osero-reverse.com/sitemap.xml
