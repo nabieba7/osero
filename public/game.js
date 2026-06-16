@@ -5,6 +5,8 @@
 const EMPTY = 0, BLACK = 1, WHITE = 2;
 const DIRS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
 const COL_LETTERS = 'ABCDEFGH';
+// Game timer
+let gameStartTime = null;
 
 const WEIGHT_MATRIX = [
   [100,-30, 10,  5,  5, 10,-30,100],
@@ -242,7 +244,7 @@ class OthelloAI {
         const mc = state.count(player), oc = state.count(opp);
         return { score: (mc - oc) * 1000, move: null };
       }
-      return this.minimax(state, depth - 1, alpha, beta, !maximizing, player);
+      return this.minimax(state, depth, alpha, beta, !maximizing, player);
     }
 
     moves.sort((a, b) => WEIGHT_MATRIX[b[0]][b[1]] - WEIGHT_MATRIX[a[0]][a[1]]);
@@ -461,17 +463,115 @@ const UI = {
     if (menuBtn) menuBtn.textContent = label + ' Theme';
   },
 
-  showOnlineMenu() {
+ showOnlineMenu() {
     document.getElementById('online-error').textContent = '';
+    const nickInput = document.getElementById('online-nickname');
+    if (Auth.isLoggedIn()) {
+      nickInput.value = Auth.user.displayName || Auth.user.username;
+      nickInput.readOnly = true;
+      nickInput.style.opacity = '0.6';
+    } else {
+      nickInput.value = '';
+      nickInput.readOnly = false;
+      nickInput.style.opacity = '1';
+    }
     document.getElementById('online-menu-overlay').classList.add('active');
   },
 
   hideOnlineMenu() {
     document.getElementById('online-menu-overlay').classList.remove('active');
   }
-};
+,
+  showLogin() {
+    document.getElementById('login-overlay').classList.add('active');
+    document.getElementById('login-error').textContent = '';
+  },
+  hideLogin() {
+    document.getElementById('login-overlay').classList.remove('active');
+  },
+  showRegister() {
+    document.getElementById('register-overlay').classList.add('active');
+    document.getElementById('register-error').textContent = '';
+  },
+  hideRegister() {
+    document.getElementById('register-overlay').classList.remove('active');
+  },
 
-// ── Game Controller ──
+  async showLeaderboard() {
+    this.showScreen('leaderboard-screen');
+    const container = document.getElementById('leaderboard-table');
+    container.innerHTML = '<div class="lb-loading">Loading...</div>';
+
+    try {
+      const res = await fetch('/api/leaderboard?limit=50');
+      const data = await res.json();
+      if (data.length === 0) {
+        container.innerHTML = '<div class="lb-empty">No players ranked yet. Play 5+ games to appear!</div>';
+        return;
+      }
+
+      let html = '<div class="lb-header"><span>#</span><span>Player</span><span>Rating</span><span>W/L/D</span><span>Win%</span></div>';
+      data.forEach((row, i) => {
+        const isMe = Auth.user && Auth.user.id === row.id;
+        html += `<div class="lb-row${isMe ? ' lb-me' : ''}${i < 3 ? ' lb-top' : ''}">
+          <span class="lb-rank">${i + 1}</span>
+          <span class="lb-name">${row.avatar} ${row.display_name}</span>
+          <span class="lb-rating">${row.rating}</span>
+          <span class="lb-record">${row.wins}/${row.losses}/${row.draws}</span>
+          <span class="lb-winrate">${row.win_rate}%</span>
+        </div>`;
+      });
+      container.innerHTML = html;
+    } catch {
+      container.innerHTML = '<div class="lb-error">Failed to load leaderboard</div>';
+    }
+  },
+
+  async showProfile() {
+    if (!Auth.isLoggedIn()) {
+      this.showLogin();
+      return;
+    }
+    this.showScreen('profile-screen');
+
+    document.getElementById('profile-avatar-large').textContent = Auth.user.avatar || '⚪';
+    document.getElementById('profile-display-name').textContent = Auth.user.displayName || Auth.user.username;
+    document.getElementById('profile-username').textContent = '@' + Auth.user.username;
+
+    try {
+      const res = await fetch('/api/stats', {
+        headers: { 'Authorization': `Bearer ${Auth.token}` }
+      });
+      const stats = await res.json();
+
+      document.getElementById('stat-total').textContent = stats.total_games || 0;
+      document.getElementById('stat-wins').textContent = stats.wins || 0;
+      document.getElementById('stat-losses').textContent = stats.losses || 0;
+      document.getElementById('stat-draws').textContent = stats.draws || 0;
+
+      if (stats.rank) {
+        document.getElementById('profile-rank-section').style.display = 'flex';
+        document.getElementById('stat-rank').textContent = '#' + stats.rank;
+        document.getElementById('stat-winrate').textContent = stats.win_rate + '%';
+      } else {
+        document.getElementById('profile-rank-section').style.display = 'none';
+      }
+
+      const recentEl = document.getElementById('profile-recent-list');
+      if (stats.recentGames && stats.recentGames.length > 0) {
+        recentEl.innerHTML = stats.recentGames.map(g => {
+          const icon = g.result === 'win' ? '🟢' : (g.result === 'loss' ? '🔴' : '🟡');
+          const modeLabel = g.mode === 'ai' ? `AI (${g.difficulty})` : g.mode;
+          return `<div class="recent-game">${icon} vs ${modeLabel} — ${g.player_score}:${g.opponent_score} <span class="recent-time">${new Date(g.played_at).toLocaleDateString()}</span></div>`;
+        }).join('');
+      } else {
+        recentEl.innerHTML = 'No games yet';
+      }
+    } catch {
+      document.getElementById('profile-recent-list').innerHTML = 'Failed to load stats';
+    }
+  }
+};
 const Game = {
   state: null,
   mode: null,
@@ -494,6 +594,7 @@ const Game = {
     this.aiThinking = false;
     this.endgameCommentShown = false;
     this.state = new BoardState();
+    gameStartTime = Date.now();
 
     UI.clearMoveLog();
     UI.hideGameOver();
@@ -513,6 +614,7 @@ const Game = {
     this.aiThinking = false;
     this.endgameCommentShown = false;
     this.state = new BoardState();
+    gameStartTime = Date.now();
 
     UI.clearMoveLog();
     UI.hideGameOver();
@@ -695,16 +797,52 @@ const Game = {
         this.advanceTurn();
       }
     }, thinkTime);
-  },
+    },
 
   endGame() {
     const bc = this.state.count(BLACK);
     const wc = this.state.count(WHITE);
     let result;
+    const duration = Math.round((Date.now() - gameStartTime) / 1000);
 
     if (bc > wc) result = 'Black wins!';
     else if (wc > bc) result = 'White wins!';
     else result = "It's a draw!";
+
+    // Save game result
+    if (this.mode === 'ai' || this.mode === 'pvp') {
+      const playerColor = this.mode === 'ai' ? this.playerColor : null;
+      if (this.mode === 'ai' && Auth.isLoggedIn()) {
+        const isBlack = this.playerColor === BLACK;
+        const myScore = isBlack ? bc : wc;
+        const oppScore = isBlack ? wc : bc;
+        let saveResult;
+        if (myScore > oppScore) saveResult = 'win';
+        else if (myScore < oppScore) saveResult = 'loss';
+        else saveResult = 'draw';
+
+        Auth.saveGameResult(
+          'ai',
+          isBlack ? 'black' : 'white',
+          saveResult,
+          myScore,
+          oppScore,
+          this.difficulty,
+          'AI',
+          duration
+        );
+      } else if (this.mode === 'pvp' && Auth.isLoggedIn()) {
+        // For local PvP, save as draw-like or just record it
+        Auth.saveGameResult('pvp', 'black', bc > wc ? 'win' : (wc > bc ? 'loss' : 'draw'), bc, wc, null, 'Player 2', duration);
+      }
+
+      // Show save hint if not logged in
+      if (!Auth.isLoggedIn()) {
+        document.getElementById('save-hint').style.display = 'block';
+      } else {
+        document.getElementById('save-hint').style.display = 'none';
+      }
+    }
 
     if (this.mode === 'ai') {
       const aiColor = this.playerColor === BLACK ? WHITE : BLACK;
@@ -718,16 +856,7 @@ const Game = {
 
     UI.showGameOver(bc, wc, result);
   },
-
-  endGameOnline(blackCount, whiteCount) {
-    let result;
-    if (blackCount > whiteCount) result = 'Black wins!';
-    else if (whiteCount > blackCount) result = 'White wins!';
-    else result = "It's a draw!";
-    UI.showGameOver(blackCount, whiteCount, result);
-  }
 };
-// ── Online Game Module ──
 const OnlineGame = {
   socket: null,
   roomId: null,
@@ -916,3 +1045,4 @@ const OnlineGame = {
 
 // ── Init ──
 UI.loadTheme();
+Auth.init();

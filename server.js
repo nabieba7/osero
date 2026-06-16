@@ -2,6 +2,12 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+const { authMiddleware, requireAuth, hashPassword, verifyPassword, generateToken } = require('./auth');
+const {
+  db, createUser, getUserByUsername, getUserById, updateUserProfile,
+ saveGame, getUserStats, getUserRecentGames,
+ getLeaderboard, getUserRank
+} = require('./db');
 
 const app = express();
 const server = http.createServer(app);
@@ -9,8 +15,117 @@ const io = new Server(server);
 
 const PORT = process.env.PORT || 3000;
 
+// Parse JSON bodies for API routes
+app.use(express.json());
+
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
+
+// ── Auth API ──
+app.post('/api/register', (req, res) => {
+  const { username, password, displayName } = req.body;
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username and password required' });
+  }
+  if (username.length < 3 || username.length > 20) {
+    return res.status(400).json({ error: 'Username must be 3-20 characters' });
+  }
+  if (password.length < 4) {
+    return res.status(400).json({ error: 'Password must be at least 4 characters' });
+  }
+
+  const existing = getUserByUsername.get(username);
+  if (existing) {
+    return res.status(409).json({ error: 'Username already taken' });
+  }
+
+  try {
+    const hash = hashPassword(password);
+    const info = createUser.run(username, hash, displayName || username);
+    const user = getUserById.get(info.lastInsertRowid);
+    const token = generateToken(user.id);
+    res.json({
+      token,
+      user: { id: user.id, username: user.username, displayName: user.display_name, avatar: user.avatar }
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Registration failed' });
+  }
+});
+
+app.post('/api/login', (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username and password required' });
+  }
+
+  const user = getUserByUsername.get(username);
+  if (!user || !verifyPassword(password, user.password_hash)) {
+    return res.status(401).json({ error: 'Invalid username or password' });
+  }
+
+  const token = generateToken(user.id);
+  res.json({
+    token,
+    user: { id: user.id, username: user.username, displayName: user.display_name, avatar: user.avatar }
+  });
+});
+
+app.get('/api/me', authMiddleware, requireAuth, (req, res) => {
+  const user = req.user;
+  res.json({
+    id: user.id, username: user.username, displayName: user.display_name, avatar: user.avatar
+  });
+});
+
+app.put('/api/me', authMiddleware, requireAuth, (req, res) => {
+  const { displayName, avatar } = req.body;
+  if (displayName && displayName.length > 30) {
+    return res.status(400).json({ error: 'Display name too long' });
+  }
+  updateUserProfile.run(displayName || req.user.display_name, avatar || req.user.avatar, req.user.id);
+  const updated = getUserById.get(req.user.id);
+  res.json({
+    id: updated.id, username: updated.username, displayName: updated.display_name, avatar: updated.avatar
+  });
+});
+
+// ── Game API ──
+app.post('/api/games', authMiddleware, requireAuth, (req, res) => {
+  const { mode, playerColor, result, playerScore, opponentScore, difficulty, opponentName, durationSeconds } = req.body;
+  if (!mode || !playerColor || !result) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+  try {
+    saveGame.run(req.user.id, mode, playerColor, result, playerScore, opponentScore, difficulty || null, opponentName || null, durationSeconds || null);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to save game' });
+  }
+});
+
+app.get('/api/stats', authMiddleware, requireAuth, (req, res) => {
+  const stats = getUserStats.get(req.user.id);
+  const recent = getUserRecentGames.all(req.user.id, 20);
+  const rankRow = getUserRank.get(req.user.id);
+  res.json({ ...stats, rank: rankRow ? rankRow.rank : null, recentGames: recent });
+});
+
+// ── Leaderboard API ──
+app.get('/api/leaderboard', (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit) || 50, 100);
+  const rows = getLeaderboard.all(limit);
+  res.json(rows);
+});
+
+app.get('/api/leaderboard/me', authMiddleware, (req, res) => {
+  if (!req.user) return res.json(null);
+  const rankRow = getUserRank.get(req.user.id);
+  const stats = getUserStats.get(req.user.id);
+  res.json({ ...stats, rank: rankRow ? rankRow.rank : null });
+});
+
+// SPA fallback
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -29,7 +144,8 @@ function createBoard() {
     grid,
     currentPlayer: BLACK,
     moveCount: 0,
-    lastMove: null
+    lastMove: null,
+    startedAt: Date.now()
   };
 }
 
@@ -87,11 +203,25 @@ function cleanupRoom(roomId) {
 io.on('connection', (socket) => {
   console.log(`Connected: ${socket.id}`);
 
+  // Auth on socket — client sends token after connect
+  socket.on('auth', (token) => {
+    const { verifyToken } = require('./auth');
+    const payload = verifyToken(token);
+    if (payload) {
+      const user = getUserById.get(payload.userId);
+      if (user) {
+        socket.userId = user.id;
+        socket.username = user.username;
+        socket.displayName = user.display_name;
+      }
+    }
+  });
+
   socket.on('create-room', (nickname) => {
     const roomId = generateRoomCode();
     rooms[roomId] = {
       board: createBoard(),
-      players: { [socket.id]: { color: BLACK, nickname: nickname || 'Player 1' } },
+      players: { [socket.id]: { color: BLACK, nickname: nickname || 'Player 1', userId: socket.userId || null } },
       nicknames: { black: nickname || 'Player 1' },
       moves: []
     };
@@ -113,18 +243,16 @@ io.on('connection', (socket) => {
     }
 
     const color = WHITE;
-    room.players[socket.id] = { color, nickname: nickname || 'Player 2' };
+    room.players[socket.id] = { color, nickname: nickname || 'Player 2', userId: socket.userId || null };
     room.nicknames.white = nickname || 'Player 2';
     socket.join(roomId.toUpperCase());
 
-    // Notify both players
     socket.emit('room-joined', { roomId: roomId.toUpperCase(), color, nickname: nickname || 'Player 2' });
     io.to(roomId.toUpperCase()).emit('game-start', {
       black: room.nicknames.black,
       white: room.nicknames.white
     });
 
-    // Send current board state to joining player
     socket.emit('board-state', {
       grid: room.board.grid,
       currentPlayer: room.board.currentPlayer,
@@ -142,15 +270,11 @@ io.on('connection', (socket) => {
     if (!player) return;
 
     const color = player.color;
-
-    // Validate: it's this player's turn
     if (room.board.currentPlayer !== color) return;
 
-    // Validate: legal move
     const flips = getFlips(room.board.grid, row, col, color);
     if (flips.length === 0) return;
 
-    // Apply move
     room.board.grid[row][col] = color;
     for (const [fr, fc] of flips) {
       room.board.grid[fr][fc] = color;
@@ -159,25 +283,22 @@ io.on('connection', (socket) => {
     room.board.lastMove = [row, col];
     room.board.currentPlayer = opponent(color);
 
-    // Check next state
     const nextMoves = getLegalMoves(room.board.grid, room.board.currentPlayer);
     const otherMoves = getLegalMoves(room.board.grid, opponent(room.board.currentPlayer));
     let skipped = false;
 
     if (nextMoves.length === 0 && otherMoves.length > 0) {
-      // Skip
       skipped = true;
       const skippedColor = room.board.currentPlayer;
       room.board.currentPlayer = opponent(room.board.currentPlayer);
       const skipName = skippedColor === BLACK ? room.nicknames.black : room.nicknames.white;
       const nextName = room.board.currentPlayer === BLACK ? room.nicknames.black : room.nicknames.white;
-      
-      // Double check after skip
+
       const afterSkipMoves = getLegalMoves(room.board.grid, room.board.currentPlayer);
       if (afterSkipMoves.length === 0) {
-        // Neither player can move
         const bc = countDiscs(room.board.grid, BLACK);
         const wc = countDiscs(room.board.grid, WHITE);
+        _saveOnlineGameResult(room, bc, wc);
         io.to(roomId).emit('game-over', { black: bc, white: wc, skipBeforeEnd: true });
         return;
       }
@@ -194,20 +315,19 @@ io.on('connection', (socket) => {
     }
 
     if (nextMoves.length === 0 && otherMoves.length === 0) {
-      // Game over
-      const bc = countDiscs(room.board.grid, BLACK);
-      const wc = countDiscs(room.board.grid, WHITE);
       io.to(roomId).emit('move-made', {
         row, col, color, flips,
         currentPlayer: room.board.currentPlayer,
         lastMove: [row, col],
         skipped: false
       });
+      const bc = countDiscs(room.board.grid, BLACK);
+      const wc = countDiscs(room.board.grid, WHITE);
+      _saveOnlineGameResult(room, bc, wc);
       io.to(roomId).emit('game-over', { black: bc, white: wc });
       return;
     }
 
-    // Normal move
     io.to(roomId).emit('move-made', {
       row, col, color, flips,
       currentPlayer: room.board.currentPlayer,
@@ -229,7 +349,6 @@ io.on('connection', (socket) => {
     const room = rooms[roomId];
     if (!room) return;
     room.board = createBoard();
-    // Swap colors
     for (const id of Object.keys(room.players)) {
       room.players[id].color = opponent(room.players[id].color);
     }
@@ -258,13 +377,11 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log(`Disconnected: ${socket.id}`);
-    // Find and notify rooms
     for (const [roomId, room] of Object.entries(rooms)) {
       if (room.players[socket.id]) {
         const nickname = room.players[socket.id].nickname;
         delete room.players[socket.id];
         io.to(roomId).emit('opponent-disconnected', nickname);
-        // Clean up room after a delay
         setTimeout(() => {
           const remaining = Object.keys(room.players).length;
           if (remaining === 0) cleanupRoom(roomId);
@@ -274,6 +391,28 @@ io.on('connection', (socket) => {
     }
   });
 });
+
+// ── Save online game results for both players ──
+function _saveOnlineGameResult(room, blackCount, whiteCount) {
+  const duration = Math.round((Date.now() - room.board.startedAt) / 1000);
+  for (const [socketId, player] of Object.entries(room.players)) {
+    if (!player.userId) continue;
+    const isBlack = player.color === BLACK;
+    const myScore = isBlack ? blackCount : whiteCount;
+    const oppScore = isBlack ? whiteCount : blackCount;
+    let result;
+    if (myScore > oppScore) result = 'win';
+    else if (myScore < oppScore) result = 'loss';
+    else result = 'draw';
+
+    const oppName = isBlack ? room.nicknames.white : room.nicknames.black;
+    try {
+      saveGame.run(player.userId, 'online', isBlack ? 'black' : 'white', result, myScore, oppScore, null, oppName, duration);
+    } catch (err) {
+      console.error('Failed to save online game result:', err);
+    }
+  }
+}
 
 server.listen(PORT, () => {
   console.log(`Osero server running on http://localhost:${PORT}`);
