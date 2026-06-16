@@ -111,6 +111,62 @@ app.get('/api/stats', authMiddleware, requireAuth, (req, res) => {
   res.json({ ...stats, rank: rankRow ? rankRow.rank : null, recentGames: recent });
 });
 
+// ── Admin API ──
+const ADMIN_KEY = process.env.ADMIN_KEY || 'osero-admin-2026';
+
+function requireAdmin(req, res, next) {
+  const key = req.headers['x-admin-key'] || req.query.key;
+  if (key !== ADMIN_KEY) {
+    return res.status(403).json({ error: 'Invalid admin key' });
+  }
+  next();
+}
+
+app.get('/api/admin/stats', requireAdmin, (req, res) => {
+  const stats = db.prepare(`
+    SELECT
+      (SELECT COUNT(*) FROM users) as total_users,
+      (SELECT COUNT(*) FROM games) as total_games,
+      (SELECT COUNT(*) FROM games WHERE played_at >= datetime('now', '-1 day')) as games_today,
+      (SELECT COUNT(*) FROM games WHERE played_at >= datetime('now', '-7 days')) as games_this_week,
+      (SELECT COUNT(DISTINCT user_id) FROM games WHERE played_at >= datetime('now', '-1 day')) as active_users_today
+  `).get();
+  res.json(stats);
+});
+
+app.get('/api/admin/users', requireAdmin, (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit) || 50, 200);
+  const users = db.prepare(`
+    SELECT
+      u.id, u.username, u.display_name, u.avatar, u.created_at,
+      COUNT(g.id) as total_games,
+      SUM(CASE WHEN g.result = 'win' THEN 1 ELSE 0 END) as wins,
+      SUM(CASE WHEN g.result = 'loss' THEN 1 ELSE 0 END) as losses,
+      MAX(g.played_at) as last_active
+    FROM users u
+    LEFT JOIN games g ON g.user_id = u.id
+    GROUP BY u.id
+    ORDER BY total_games DESC
+    LIMIT ?
+  `).all(limit);
+  res.json(users);
+});
+
+app.get('/api/admin/games', requireAdmin, (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit) || 50, 200);
+  const games = db.prepare(`
+    SELECT
+      g.id, u.username, g.mode, g.player_color, g.result,
+      g.player_score, g.opponent_score, g.difficulty, g.opponent_name,
+      g.duration_seconds, g.played_at
+    FROM games g
+    JOIN users u ON g.user_id = u.id
+    ORDER BY g.played_at DESC
+    LIMIT ?
+  `).all(limit);
+  res.json(games);
+});
+
 // ── Leaderboard API ──
 app.get('/api/leaderboard', (req, res) => {
   const limit = Math.min(parseInt(req.query.limit) || 50, 100);
