@@ -305,32 +305,18 @@ const UI = {
         cell.dataset.row = r;
         cell.dataset.col = c;
 
-        // Alternating cell parity for subtle depth
-        if ((r + c) % 2 === 1) {
-          cell.dataset.parity = 'dark';
-        }
-
         if (state.lastMove && state.lastMove[0] === r && state.lastMove[1] === c) {
           cell.classList.add('last-move');
         }
-
-        const isLegal = legal.some(([mr, mc]) => mr === r && mc === c);
 
         if (state.grid[r][c] !== EMPTY) {
           const disc = document.createElement('div');
           disc.className = `disc ${state.grid[r][c] === BLACK ? 'black' : 'white'}`;
           disc.id = `disc-${r}-${c}`;
           cell.appendChild(disc);
-        } else if (isLegal) {
-          cell.classList.add('valid-move');
-
-          // Hover preview disc
-          const preview = document.createElement('div');
-          preview.className = `hover-preview ${state.currentPlayer === BLACK ? 'black-preview' : 'white-preview'}`;
-          cell.appendChild(preview);
-
-          // Hint dot
-          if (this.showHints && !Game.aiThinking) {
+        } else if (this.showHints && !Game.aiThinking) {
+          const isLegal = legal.some(([mr, mc]) => mr === r && mc === c);
+          if (isLegal) {
             const hint = document.createElement('div');
             hint.className = `hint-dot ${state.currentPlayer === BLACK ? 'black-hint' : 'white-hint'}`;
             cell.appendChild(hint);
@@ -344,47 +330,30 @@ const UI = {
   },
 
   updateScore(state) {
-    const blackEl = document.getElementById('black-count');
-    const whiteEl = document.getElementById('white-count');
-    const newBlack = state.count(BLACK);
-    const newWhite = state.count(WHITE);
-
-    // Animate if changed
-    if (blackEl.textContent !== String(newBlack)) {
-      blackEl.textContent = newBlack;
-      blackEl.classList.remove('score-changed');
-      void blackEl.offsetWidth; // trigger reflow
-      blackEl.classList.add('score-changed');
-    }
-    if (whiteEl.textContent !== String(newWhite)) {
-      whiteEl.textContent = newWhite;
-      whiteEl.classList.remove('score-changed');
-      void whiteEl.offsetWidth;
-      whiteEl.classList.add('score-changed');
-    }
+    document.getElementById('black-count').textContent = state.count(BLACK);
+    document.getElementById('white-count').textContent = state.count(WHITE);
   },
 
   updateTurn(state) {
     const disc = document.querySelector('.turn-disc');
     const text = document.getElementById('turn-text');
     const isBlack = state.currentPlayer === BLACK;
-    disc.className = `turn-disc ${isBlack ? 'black-disc-small' : 'white-disc-small'} active-turn`;
+    disc.className = `turn-disc ${isBlack ? 'black-disc-small' : 'white-disc-small'}`;
     text.textContent = `${isBlack ? "Black" : "White"}'s turn`;
   },
 
   animateFlips(flips, toColor, callback) {
-    const delay = 70;
+    const delay = 60;
     flips.forEach(([r, c], i) => {
       setTimeout(() => {
         const disc = document.getElementById(`disc-${r}-${c}`);
         if (!disc) return;
         disc.classList.add('flipping');
-        // Swap color at midpoint (when disc is edge-on at rotateY 90°)
         setTimeout(() => {
           disc.className = `disc ${toColor === BLACK ? 'black' : 'white'} flipping`;
           disc.id = `disc-${r}-${c}`;
           disc.addEventListener('animationend', () => disc.classList.remove('flipping'), { once: true });
-        }, 180); // ~40% of 450ms = midpoint
+        }, 250);
       }, i * delay);
     });
     setTimeout(callback, flips.length * delay + 500);
