@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f0f1a"/>
+      <stop offset="50%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#0f0f1a"/>
+    </linearGradient>
+    <linearGradient id="board" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a5c2a"/>
+      <stop offset="100%" style="stop-color:#145020"/>
+    </linearGradient>
+    <radialGradient id="blackDisc" cx="38%" cy="35%">
+      <stop offset="0%" style="stop-color:#666"/>
+      <stop offset="20%" style="stop-color:#333"/>
+      <stop offset="55%" style="stop-color:#1a1a1a"/>
+      <stop offset="100%" style="stop-color:#000"/>
+    </radialGradient>
+    <radialGradient id="whiteDisc" cx="38%" cy="35%">
+      <stop offset="0%" style="stop-color:#fff"/>
+      <stop offset="20%" style="stop-color:#f5f0e8"/>
+      <stop offset="55%" style="stop-color:#e8e0d0"/>
+      <stop offset="100%" style="stop-color:#c8c0b0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Mini board (left side) -->
+  <g transform="translate(60, 80)">
+    <!-- Wood border -->
+    <rect x="-6" y="-6" width="482" height="482" rx="4" fill="#3d2510"/>
+    <rect x="-4" y="-4" width="478" height="478" rx="3" fill="#5c3a1e"/>
+    <rect x="-2" y="-2" width="474" height="474" rx="2" fill="#3d2510"/>
+    <!-- Board -->
+    <rect width="470" height="470" rx="2" fill="url(#board)"/>
+    <!-- Grid lines -->
+    <g stroke="rgba(200,168,78,0.35)" stroke-width="1">
+      <!-- Vertical -->
+      <line x1="58.75" y1="0" x2="58.75" y2="470"/>
+      <line x1="117.5" y1="0" x2="117.5" y2="470"/>
+      <line x1="176.25" y1="0" x2="176.25" y2="470"/>
+      <line x1="235" y1="0" x2="235" y2="470"/>
+      <line x1="293.75" y1="0" x2="293.75" y2="470"/>
+      <line x1="352.5" y1="0" x2="352.5" y2="470"/>
+      <line x1="411.25" y1="0" x2="411.25" y2="470"/>
+      <!-- Horizontal -->
+      <line x1="0" y1="58.75" x2="470" y2="58.75"/>
+      <line x1="0" y1="117.5" x2="470" y2="117.5"/>
+      <line x1="0" y1="176.25" x2="470" y2="176.25"/>
+      <line x1="0" y1="235" x2="470" y2="235"/>
+      <line x1="0" y1="293.75" x2="470" y2="293.75"/>
+      <line x1="0" y1="352.5" x2="470" y2="352.5"/>
+      <line x1="0" y1="411.25" x2="470" y2="411.25"/>
+    </g>
+
+    <!-- Some discs scattered on the board for visual appeal -->
+    <!-- Center 4 (starting position) -->
+    <circle cx="293.75" cy="176.25" r="22" fill="url(#whiteDisc)"/>
+    <circle cx="352.5" cy="176.25" r="22" fill="url(#blackDisc)"/>
+    <circle cx="293.75" cy="235" r="22" fill="url(#blackDisc)"/>
+    <circle cx="352.5" cy="235" r="22" fill="url(#whiteDisc)"/>
+    <!-- A few more scattered -->
+    <circle cx="235" cy="176.25" r="22" fill="url(#blackDisc)"/>
+    <circle cx="176.25" cy="235" r="22" fill="url(#whiteDisc)"/>
+    <circle cx="293.75" cy="117.5" r="22" fill="url(#blackDisc)"/>
+    <circle cx="352.5" cy="293.75" r="22" fill="url(#whiteDisc)"/>
+    <circle cx="411.25" cy="235" r="22" fill="url(#blackDisc)"/>
+    <circle cx="117.5" cy="293.75" r="22" fill="url(#blackDisc)"/>
+    <circle cx="176.25" cy="352.5" r="22" fill="url(#whiteDisc)"/>
+    <circle cx="235" cy="411.25" r="22" fill="url(#blackDisc)"/>
+
+    <!-- Star points (corner markers) -->
+    <circle cx="58.75" cy="58.75" r="4" fill="rgba(200,168,78,0.5)"/>
+    <circle cx="411.25" cy="58.75" r="4" fill="rgba(200,168,78,0.5)"/>
+    <circle cx="58.75" cy="411.25" r="4" fill="rgba(200,168,78,0.5)"/>
+    <circle cx="411.25" cy="411.25" r="4" fill="rgba(200,168,78,0.5)"/>
+  </g>
+
+  <!-- Right side: text content -->
+  <g transform="translate(620, 140)">
+    <!-- Title -->
+    <text x="0" y="0" font-family="'Segoe UI', Arial, sans-serif" font-size="72" font-weight="800" fill="#f0ece4" letter-spacing="2">
+      ⚫ Osero ⚪
+    </text>
+
+    <!-- Subtitle -->
+    <text x="0" y="60" font-family="'Segoe UI', Arial, sans-serif" font-size="28" fill="#a09b8f" letter-spacing="1">
+      Play Othello (Reversi) Online — Free
+    </text>
+
+    <!-- Feature pills -->
+    <g transform="translate(0, 100)">
+      <!-- AI pill -->
+      <rect x="0" y="0" width="140" height="42" rx="21" fill="rgba(255,255,255,0.08)" stroke="rgba(200,168,78,0.3)" stroke-width="1"/>
+      <text x="70" y="27" font-family="'Segoe UI', Arial, sans-serif" font-size="16" font-weight="700" fill="#c8a84e" text-anchor="middle">🤖 vs AI</text>
+
+      <!-- Local pill -->
+      <rect x="160" y="0" width="180" height="42" rx="21" fill="rgba(255,255,255,0.08)" stroke="rgba(200,168,78,0.3)" stroke-width="1"/>
+      <text x="250" y="27" font-family="'Segoe UI', Arial, sans-serif" font-size="16" font-weight="700" fill="#c8a84e" text-anchor="middle">👥 2-Player</text>
+
+      <!-- Online pill -->
+      <rect x="360" y="0" width="180" height="42" rx="21" fill="rgba(255,255,255,0.08)" stroke="rgba(200,168,78,0.3)" stroke-width="1"/>
+      <text x="450" y="27" font-family="'Segoe UI', Arial, sans-serif" font-size="16" font-weight="700" fill="#c8a84e" text-anchor="middle">🌍 Online</text>
+    </g>
+
+    <!-- Tagline -->
+    <text x="0" y="190" font-family="'Segoe UI', Arial, sans-serif" font-size="20" fill="#a09b8f">
+      🏆 Leaderboard · 📊 Stats · 🌙 Dark &amp; Light Themes
+    </text>
+
+    <!-- URL -->
+    <text x="0" y="250" font-family="'Segoe UI', Arial, sans-serif" font-size="18" fill="rgba(200,168,78,0.6)">
+      osero-reverse.com
+    </text>
+  </g>
+
+  <!-- Bottom accent line -->
+  <rect x="0" y="622" width="1200" height="8" fill="#c8a84e" opacity="0.6"/>
+</svg>
