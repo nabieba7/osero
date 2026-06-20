@@ -7,6 +7,28 @@ const DIRS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
 const COL_LETTERS = 'ABCDEFGH';
 // Game timer
 let gameStartTime = null;
+let timerInterval = null;
+
+function startTimer() {
+  stopTimer();
+  gameStartTime = Date.now();
+  const timerEl = document.getElementById('game-timer');
+  if (!timerEl) return;
+  timerEl.textContent = '0:00';
+  timerInterval = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
+    const mins = Math.floor(elapsed / 60);
+    const secs = elapsed % 60;
+    timerEl.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+  }, 1000);
+}
+
+function stopTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+}
 
 const WEIGHT_MATRIX = [
   [100,-30, 10,  5,  5, 10,-30,100],
@@ -310,6 +332,11 @@ const UI = {
           cell.dataset.parity = 'dark';
         }
 
+        // Star points at d4, d5, e4, e5 (center dots like real board)
+        if ((r === 3 || r === 4) && (c === 3 || c === 4)) {
+          cell.classList.add('star-point');
+        }
+
         if (state.lastMove && state.lastMove[0] === r && state.lastMove[1] === c) {
           cell.classList.add('last-move');
         }
@@ -346,14 +373,17 @@ const UI = {
   updateScore(state) {
     const blackEl = document.getElementById('black-count');
     const whiteEl = document.getElementById('white-count');
+    const blackBar = document.getElementById('black-bar');
+    const whiteBar = document.getElementById('white-bar');
     const newBlack = state.count(BLACK);
     const newWhite = state.count(WHITE);
+    const total = newBlack + newWhite;
 
     // Animate if changed
     if (blackEl.textContent !== String(newBlack)) {
       blackEl.textContent = newBlack;
       blackEl.classList.remove('score-changed');
-      void blackEl.offsetWidth; // trigger reflow
+      void blackEl.offsetWidth;
       blackEl.classList.add('score-changed');
     }
     if (whiteEl.textContent !== String(newWhite)) {
@@ -362,6 +392,10 @@ const UI = {
       void whiteEl.offsetWidth;
       whiteEl.classList.add('score-changed');
     }
+
+    // Progress bars (out of 64 total squares)
+    if (blackBar) blackBar.style.width = (newBlack / 64 * 100) + '%';
+    if (whiteBar) whiteBar.style.width = (newWhite / 64 * 100) + '%';
   },
 
   updateTurn(state) {
@@ -370,6 +404,12 @@ const UI = {
     const isBlack = state.currentPlayer === BLACK;
     disc.className = `turn-disc ${isBlack ? 'black-disc-small' : 'white-disc-small'} active-turn`;
     text.textContent = `${isBlack ? "Black" : "White"}'s turn`;
+
+    // Highlight active player panel
+    const blackPanel = document.getElementById('black-panel');
+    const whitePanel = document.getElementById('white-panel');
+    if (blackPanel) blackPanel.classList.toggle('active-player', isBlack);
+    if (whitePanel) whitePanel.classList.toggle('active-player', !isBlack);
   },
 
   animateFlips(flips, toColor, callback) {
@@ -625,7 +665,7 @@ const Game = {
     this.aiThinking = false;
     this.endgameCommentShown = false;
     this.state = new BoardState();
-    gameStartTime = Date.now();
+    startTimer();
 
     UI.clearMoveLog();
     UI.hideGameOver();
@@ -645,7 +685,7 @@ const Game = {
     this.aiThinking = false;
     this.endgameCommentShown = false;
     this.state = new BoardState();
-    gameStartTime = Date.now();
+    startTimer();
 
     UI.clearMoveLog();
     UI.hideGameOver();
@@ -669,6 +709,7 @@ const Game = {
   },
 
   backToMenu() {
+    stopTimer();
     UI.hideGameOver();
     UI.showScreen('menu-screen');
     this.state = null;
@@ -831,6 +872,7 @@ const Game = {
     },
 
   endGame() {
+    stopTimer();
     const bc = this.state.count(BLACK);
     const wc = this.state.count(WHITE);
     let result;
