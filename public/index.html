@@ -125,7 +125,7 @@
       </div>
 
       <button class="rules-btn" onclick="UI.showRules()" aria-label="How to play rules"><svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Rules</button>
-      <button class="rules-btn" onclick="UI.showTutorial()" aria-label="Interactive tutorial">🎮 Tutorial</button>
+      <button class="rules-btn" id="tutorial-menu-btn" onclick="UI.showTutorial()" aria-label="Interactive tutorial">Tutorial</button>
       <button class="theme-toggle-menu" onclick="UI.toggleTheme()" aria-label="Toggle light and dark theme"><svg class="icon-svg theme-icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><span class="theme-label">Theme</span></button>
 
       <div class="menu-section">
@@ -425,6 +425,6 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="auth.js?v=2"></script>
-  <script src="game.js?v=2"></script>
+  <script src="game.js?v=3"></script>
 </body>
 </html>

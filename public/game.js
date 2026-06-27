@@ -600,7 +600,9 @@ const UI = {
   showTutorial() {
     this.tutorialStep = 0;
     this.renderTutorialStep();
-    document.getElementById('tutorial-overlay').classList.add('active');
+    const overlay = document.getElementById('tutorial-overlay');
+    if (!overlay) { console.error('tutorial-overlay not found'); return; }
+    overlay.classList.add('active');
   },
 
   renderTutorialStep() {
@@ -1275,3 +1277,9 @@ const OnlineGame = {
 UI.loadTheme();
 Auth.init();
 UI.checkTutorial();
+
+// Fallback: ensure tutorial button works even if onclick fails
+const tutBtn = document.getElementById('tutorial-menu-btn');
+if (tutBtn) {
+  tutBtn.addEventListener('click', () => UI.showTutorial());
+}
