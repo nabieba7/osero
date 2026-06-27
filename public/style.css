@@ -709,6 +709,8 @@ body {
   height: 82%;
   border-radius: 50%;
   position: absolute;
+  top: 9%;
+  left: 9%;
   opacity: 0;
   transform: scale(0.6);
   transition: opacity 0.2s ease, transform 0.2s ease;
@@ -726,6 +728,9 @@ body {
 .cell.last-move::after {
   content: '';
   position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 8px;
   height: 8px;
   border-radius: 50%;
@@ -740,6 +745,9 @@ body {
   width: 28%;
   height: 28%;
   border-radius: 50%;
+  position: absolute;
+  top: 36%;
+  left: 36%;
   opacity: 0.35;
   pointer-events: none;
   animation: hintPulse 2s ease-in-out infinite;
@@ -762,6 +770,8 @@ body {
   height: 82%;
   border-radius: 50%;
   position: absolute;
+  top: 9%;
+  left: 9%;
   transform-style: preserve-3d;
   z-index: 2;
 }
