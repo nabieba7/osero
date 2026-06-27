@@ -336,10 +336,6 @@ const UI = {
         cell.className = 'cell';
         cell.dataset.row = r;
         cell.dataset.col = c;
-        cell.setAttribute('role', 'gridcell');
-        const isLegal = legal.some(([mr, mc]) => mr === r && mc === c);
-
-        cell.setAttribute('aria-label', `${COL_LETTERS[c]}${r + 1}${state.grid[r][c] !== EMPTY ? (state.grid[r][c] === BLACK ? ' Black' : ' White') : isLegal ? ' Available move' : ' Empty'}`);
 
         // Alternating cell parity for subtle depth
         if ((r + c) % 2 === 1) {
@@ -354,6 +350,8 @@ const UI = {
         if (state.lastMove && state.lastMove[0] === r && state.lastMove[1] === c) {
           cell.classList.add('last-move');
         }
+
+        const isLegal = legal.some(([mr, mc]) => mr === r && mc === c);
 
         if (state.grid[r][c] !== EMPTY) {
           const disc = document.createElement('div');
@@ -500,9 +498,7 @@ const UI = {
     this.showHints = !this.showHints;
     const btn = document.getElementById('hints-btn');
     btn.classList.toggle('hints-active', this.showHints);
-    btn.innerHTML = this.showHints
-      ? '<svg class="icon-svg" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
-      : '<svg class="icon-svg" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+    btn.textContent = this.showHints ? '👁' : '👁‍🗨';
     if (Game.state) this.renderBoard(Game.state);
   },
 
@@ -531,11 +527,11 @@ const UI = {
     const isLight = html.getAttribute('data-theme') === 'light';
     html.setAttribute('data-theme', isLight ? 'dark' : 'light');
     localStorage.setItem('osero-theme', isLight ? 'dark' : 'light');
-    const isNowDark = !isLight;
+    const label = isLight ? '🌙' : '☀️';
     const btn = document.getElementById('theme-btn');
     const menuBtn = document.querySelector('.theme-toggle-menu');
-    if (btn) btn.innerHTML = isNowDark ? '<svg class="icon-svg" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>' : '<svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
-    if (menuBtn) menuBtn.innerHTML = (isNowDark ? '<svg class="icon-svg theme-icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>' : '<svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>') + '<span class="theme-label">Theme</span>';
+    if (btn) btn.textContent = label;
+    if (menuBtn) menuBtn.textContent = label + ' Theme';
     // Update theme-color meta for mobile browsers
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.content = isLight ? '#0f0f1a' : '#c8b88a';
@@ -544,11 +540,11 @@ const UI = {
   loadTheme() {
     const saved = localStorage.getItem('osero-theme') || 'dark';
     document.documentElement.setAttribute('data-theme', saved);
-    const isDark = saved === 'dark';
+    const label = saved === 'light' ? '☀️' : '🌙';
     const btn = document.getElementById('theme-btn');
     const menuBtn = document.querySelector('.theme-toggle-menu');
-    if (btn) btn.innerHTML = isDark ? '<svg class="icon-svg" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>' : '<svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
-    if (menuBtn) menuBtn.innerHTML = (isDark ? '<svg class="icon-svg theme-icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>' : '<svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>') + '<span class="theme-label">Theme</span>';
+    if (btn) btn.textContent = label;
+    if (menuBtn) menuBtn.textContent = label + ' Theme';
     // Set correct theme-color meta on load
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.content = saved === 'light' ? '#c8b88a' : '#0f0f1a';
@@ -586,56 +582,6 @@ const UI = {
   },
   hideRegister() {
     document.getElementById('register-overlay').classList.remove('active');
-  },
-
-  tutorialSteps: [
-    { title: 'Welcome to Osero!', text: 'Place discs to flip your opponent\'s pieces to your color. The player with the most discs at the end wins!' },
-    { title: 'Sandwich to Flip', text: 'You must place your disc so it sandwiches at least one opponent disc in a straight line \u2014 horizontally, vertically, or diagonally.' },
-    { title: 'Chain Flips', text: 'If your move sandwiches discs in multiple directions, ALL of them flip at once. One great move can change the whole board!' },
-    { title: 'Corner = Power', text: 'A disc in a corner can never be flipped. Corners are the most powerful squares on the board \u2014 always try to take one!' },
-    { title: 'You\'re Ready!', text: 'If you have no legal moves, your turn is skipped. The game ends when neither player can move, or the board is full. Good luck!' }
-  ],
-  tutorialStep: 0,
-
-  showTutorial() {
-    this.tutorialStep = 0;
-    this.renderTutorialStep();
-    const overlay = document.getElementById('tutorial-overlay');
-    if (!overlay) { console.error('tutorial-overlay not found'); return; }
-    overlay.classList.add('active');
-  },
-
-  renderTutorialStep() {
-    const step = this.tutorialSteps[this.tutorialStep];
-    document.getElementById('tutorial-counter').textContent = `Step ${this.tutorialStep + 1} of ${this.tutorialSteps.length}`;
-    document.getElementById('tutorial-title').textContent = step.title;
-    document.getElementById('tutorial-text').textContent = step.text;
-    const nextBtn = document.getElementById('tutorial-next');
-    if (this.tutorialStep === this.tutorialSteps.length - 1) {
-      nextBtn.textContent = 'Let\'s Play!';
-    } else {
-      nextBtn.textContent = 'Next';
-    }
-  },
-
-  nextTutorialStep() {
-    this.tutorialStep++;
-    if (this.tutorialStep >= this.tutorialSteps.length) {
-      this.endTutorial();
-    } else {
-      this.renderTutorialStep();
-    }
-  },
-
-  endTutorial() {
-    document.getElementById('tutorial-overlay').classList.remove('active');
-    localStorage.setItem('osero-tutorial-done', 'true');
-  },
-
-  checkTutorial() {
-    if (!localStorage.getItem('osero-tutorial-done')) {
-      this.showTutorial();
-    }
   },
 
   async showLeaderboard() {
@@ -701,8 +647,8 @@ const UI = {
       const recentEl = document.getElementById('profile-recent-list');
       if (stats.recentGames && stats.recentGames.length > 0) {
         recentEl.innerHTML = stats.recentGames.map(g => {
-          const icon = g.result === 'win' ? 'W' : (g.result === 'loss' ? 'L' : 'D');
-          const modeLabel = g.mode === 'ai' ? `AI` : g.mode;
+          const icon = g.result === 'win' ? '🟢' : (g.result === 'loss' ? '🔴' : '🟡');
+          const modeLabel = g.mode === 'ai' ? `AI (${g.difficulty})` : g.mode;
           return `<div class="recent-game">${icon} vs ${modeLabel} — ${g.player_score}:${g.opponent_score} <span class="recent-time">${new Date(g.played_at).toLocaleDateString()}</span></div>`;
         }).join('');
       } else {
@@ -711,94 +657,7 @@ const UI = {
     } catch {
       document.getElementById('profile-recent-list').innerHTML = 'Failed to load stats';
     }
-  },
-
-  // ── Match History ──
-  _historyPage: 1,
-  _historyFilter: 'all',
-
-  async showHistory() {
-    if (!Auth.isLoggedIn()) {
-      this.showLogin();
-      return;
-    }
-    this._historyPage = 1;
-    this._historyFilter = 'all';
-    this.showScreen('history-screen');
-    await this.loadHistory();
-  },
-
-  async loadHistory() {
-    const listEl = document.getElementById('history-list');
-    listEl.innerHTML = '<div class="lb-loading">Loading...</div>';
-
-    try {
-      const res = await fetch(`/api/games/history?page=${this._historyPage}&perPage=15`, {
-        headers: { 'Authorization': `Bearer ${Auth.token}` }
-      });
-      const data = await res.json();
-
-      let games = data.games || [];
-      if (this._historyFilter !== 'all') {
-        games = games.filter(g => g.result === this._historyFilter);
-      }
-
-      if (games.length === 0) {
-        listEl.innerHTML = '<div class="lb-empty">No games found</div>';
-        document.getElementById('history-pagination').innerHTML = '';
-        return;
-      }
-
-      listEl.innerHTML = games.map(g => {
-        const modeLabel = g.mode === 'ai' ? `vs AI` : g.mode === 'online' ? 'Online' : 'Local';
-        const diffLabel = g.difficulty ? ` (${['','Easy','Medium','Hard'][g.difficulty/2] || 'Lvl'+g.difficulty})` : '';
-        const oppLabel = g.opponent_name ? ` vs ${g.opponent_name}` : '';
-        const duration = g.duration_seconds ? `${Math.floor(g.duration_seconds/60)}:${String(g.duration_seconds%60).padStart(2,'0')}` : '';
-        const date = new Date(g.played_at);
-        const dateStr = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-        const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-
-        return `<div class="history-item">
-          <div class="history-result-icon ${g.result}">${g.result === 'win' ? 'W' : g.result === 'loss' ? 'L' : 'D'}</div>
-          <div class="history-details">
-            <div class="history-mode">${modeLabel}${diffLabel}${oppLabel}</div>
-            <div class="history-meta">${dateStr} at ${timeStr}${duration ? ' · ' + duration : ''}</div>
-          </div>
-          <div class="history-score">${g.player_score} – ${g.opponent_score}</div>
-        </div>`;
-      }).join('');
-
-      // Pagination
-      const p = data.pagination;
-      if (p.totalPages > 1) {
-        let btns = '';
-        btns += `<button class="history-page-btn" ${p.page <= 1 ? 'disabled' : ''} onclick="UI._historyGo(${p.page - 1})">← Prev</button>`;
-        const start = Math.max(1, p.page - 2);
-        const end = Math.min(p.totalPages, p.page + 2);
-        for (let i = start; i <= end; i++) {
-          btns += `<button class="history-page-btn ${i === p.page ? 'active' : ''}" onclick="UI._historyGo(${i})">${i}</button>`;
-        }
-        btns += `<button class="history-page-btn" ${p.page >= p.totalPages ? 'disabled' : ''} onclick="UI._historyGo(${p.page + 1})">Next →</button>`;
-        document.getElementById('history-pagination').innerHTML = btns;
-      } else {
-        document.getElementById('history-pagination').innerHTML = '';
-      }
-    } catch {
-      listEl.innerHTML = '<div class="lb-error">Failed to load history</div>';
-    }
-  },
-
-  filterHistory(btn) {
-    document.querySelectorAll('#history-filters .diff-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    this._historyFilter = btn.dataset.filter;
-    this.loadHistory();
-  },
-
-  _historyGo(page) {
-    this._historyPage = page;
-    this.loadHistory();
-  },
+  }
 };
 const Game = {
   state: null,
@@ -1274,30 +1133,5 @@ const OnlineGame = {
 };
 
 // ── Init ──
-try { UI.loadTheme(); } catch(e) { console.error('loadTheme error:', e); }
-try { Auth.init(); } catch(e) { console.error('Auth.init error:', e); }
-try { UI.checkTutorial(); } catch(e) { console.error('checkTutorial error:', e); }
-
-// Fallback: ensure tutorial button works even if onclick fails
-const tutBtn = document.getElementById('tutorial-menu-btn');
-if (tutBtn) {
-  tutBtn.addEventListener('click', () => UI.showTutorial());
-}
-
-// Debug: catch errors in game start
-globalThis.__oseroDebug = true;
-const origStart = Game.start.bind(Game);
-Game.start = function(...args) {
-  try {
-    console.log('Game.start called with:', args);
-    const result = origStart(...args);
-    const board = document.getElementById('board');
-    console.log('Board children after start:', board ? board.children.length : 'no board');
-    console.log('Board innerHTML length:', board ? board.innerHTML.length : 'no board');
-    return result;
-  } catch(e) {
-    console.error('Game.start error:', e);
-    alert('Game error: ' + e.message);
-    throw e;
-  }
-};
+UI.loadTheme();
+Auth.init();

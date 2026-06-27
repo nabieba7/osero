@@ -33,7 +33,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./style.css?v=5">
+  <link rel="stylesheet" href="./style.css?v=2">
 
   <!-- Structured Data for Google Rich Results -->
   <script type="application/ld+json">
@@ -69,10 +69,7 @@
   </script>
 
 </head>
-<body role="main">
-
-  <!-- Skip link for keyboard users -->
-  <a href="#menu-screen" class="skip-link">Skip to main content</a>
+<body>
 
   <!-- ═══════ MENU SCREEN ═══════ -->
   <div id="menu-screen" class="screen active">
@@ -83,50 +80,49 @@
       <!-- Auth status bar -->
       <div id="auth-status" class="auth-status">
         <div id="auth-logged-out" class="auth-logged-out">
-          <button class="menu-btn auth-btn" onclick="UI.showLogin()"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>Login</button>
-          <button class="menu-btn auth-btn secondary" onclick="UI.showRegister()"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3z"/></svg>Sign Up</button>
+          <button class="menu-btn auth-btn" onclick="UI.showLogin()">🔑 Login</button>
+          <button class="menu-btn auth-btn secondary" onclick="UI.showRegister()">✨ Sign Up</button>
         </div>
         <div id="auth-logged-in" class="auth-logged-in" style="display:none">
           <span class="user-avatar" id="menu-avatar">⚪</span>
           <span class="user-greeting" id="menu-greeting">Player</span>
-          <button class="icon-btn" onclick="UI.showProfile()" title="Profile"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
-          <button class="icon-btn" onclick="Auth.logout()" title="Logout"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+          <button class="icon-btn" onclick="UI.showProfile()" title="Profile">👤</button>
+          <button class="icon-btn" onclick="Auth.logout()" title="Logout">🚪</button>
         </div>
       </div>
 
       <div class="menu-section">
         <h2>vs AI</h2>
-        <button class="menu-btn black-btn" onclick="Game.start('ai', 'black')" aria-label="Play as Black against AI">
+        <button class="menu-btn black-btn" onclick="Game.start('ai', 'black')">
           ⚫ Play as Black
         </button>
-        <button class="menu-btn white-btn" onclick="Game.start('ai', 'white')" aria-label="Play as White against AI">
+        <button class="menu-btn white-btn" onclick="Game.start('ai', 'white')">
           ⚪ Play as White
         </button>
       </div>
 
       <div class="menu-section">
         <h2>vs Player</h2>
-        <button class="menu-btn local-btn" onclick="Game.start('pvp')" aria-label="Start local 2-player game">
-          <svg class="icon-svg" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Local 2-Player
+        <button class="menu-btn local-btn" onclick="Game.start('pvp')">
+          👥 Local 2-Player
         </button>
       </div>
       <div class="menu-section">
         <h2>Online</h2>
-        <button class="menu-btn online-btn" onclick="UI.showOnlineMenu()" aria-label="Play online with friends">
-          <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Play Online
+        <button class="menu-btn online-btn" onclick="UI.showOnlineMenu()">
+          🌍 Play Online
         </button>
       </div>
 
       <div class="menu-section">
         <h2>Rankings</h2>
-        <button class="menu-btn leaderboard-btn" onclick="UI.showLeaderboard()" aria-label="View leaderboard rankings">
-          <svg class="icon-svg" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 6 9 6 9zm12 0h1.5a2.5 2.5 0 0 0 0-5C17 4 18 9 18 9z"/><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8l-6.2 4.5 2.4-7.4L2 9.4h7.6z"/></svg>Leaderboard
+        <button class="menu-btn leaderboard-btn" onclick="UI.showLeaderboard()">
+          🏆 Leaderboard
         </button>
       </div>
 
-      <button class="rules-btn" onclick="UI.showRules()" aria-label="How to play rules"><svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Rules</button>
-      <button class="rules-btn" id="tutorial-menu-btn" onclick="UI.showTutorial()" aria-label="Interactive tutorial">Tutorial</button>
-      <button class="theme-toggle-menu" onclick="UI.toggleTheme()" aria-label="Toggle light and dark theme"><svg class="icon-svg theme-icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><span class="theme-label">Theme</span></button>
+      <button class="rules-btn" onclick="UI.showRules()">❓ Rules</button>
+      <button class="theme-toggle-menu" onclick="UI.toggleTheme()">🌙 Theme</button>
 
       <div class="menu-section">
         <label class="difficulty-label">AI Difficulty</label>
@@ -145,15 +141,15 @@
 
       <!-- Top bar -->
       <div class="top-bar">
-        <button class="icon-btn" onclick="Game.backToMenu()" title="Back to Menu" aria-label="Back to menu">← Menu</button>
+        <button class="icon-btn" onclick="Game.backToMenu()" title="Back to Menu">← Menu</button>
         <div class="turn-indicator" id="turn-indicator">
           <span class="turn-disc black-disc-small"></span>
           <span id="turn-text">Black's turn</span>
         </div>
         <div class="top-bar-right">
-          <button class="icon-btn" onclick="UI.toggleTheme()" id="theme-btn" title="Toggle theme" aria-label="Toggle theme"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
-          <button class="icon-btn" onclick="UI.toggleHints()" id="hints-btn" title="Toggle hints" aria-label="Toggle move hints"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
-          <button class="icon-btn" onclick="Game.restart()" title="Restart" aria-label="Restart game"><svg class="icon-svg" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+          <button class="icon-btn" onclick="UI.toggleTheme()" id="theme-btn" title="Toggle theme">🌙</button>
+          <button class="icon-btn" onclick="UI.toggleHints()" id="hints-btn" title="Toggle hints">👁</button>
+          <button class="icon-btn" onclick="Game.restart()" title="Restart">↻</button>
         </div>
       </div>
 
@@ -201,7 +197,7 @@
             <span>1</span><span>2</span><span>3</span><span>4</span>
             <span>5</span><span>6</span><span>7</span><span>8</span>
           </div>
-          <div class="board" id="board" role="grid" aria-label="Othello game board"></div>
+          <div class="board" id="board"></div>
         </div>
       </div>
 
@@ -210,7 +206,7 @@
 
       <!-- Move log -->
       <div class="move-log-container">
-        <button class="move-log-toggle" onclick="UI.toggleMoveLog()"><svg class="icon-svg" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Move Log</button>
+        <button class="move-log-toggle" onclick="UI.toggleMoveLog()">📝 Move Log</button>
         <div class="move-log" id="move-log" style="display:none;"></div>
       </div>
 
@@ -222,7 +218,7 @@
     <div class="leaderboard-container">
       <div class="leaderboard-header">
         <button class="icon-btn" onclick="UI.showScreen('menu-screen')">← Back</button>
-        <h1><svg class="icon-svg" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 6 9 6 9zm12 0h1.5a2.5 2.5 0 0 0 0-5C17 4 18 9 18 9z"/><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8l-6.2 4.5 2.4-7.4L2 9.4h7.6z"/></svg>Leaderboard</h1>
+        <h1>🏆 Leaderboard</h1>
         <div style="width:70px"></div>
       </div>
       <p class="leaderboard-subtitle">Top players — minimum 5 games to rank</p>
@@ -237,7 +233,7 @@
     <div class="profile-container">
       <div class="profile-header">
         <button class="icon-btn" onclick="UI.showScreen('menu-screen')">← Back</button>
-        <h1><svg class="icon-svg" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</h1>
+        <h1>👤 Profile</h1>
         <div style="width:70px"></div>
       </div>
       <div id="profile-content" class="profile-content">
@@ -275,29 +271,7 @@
           <h3>Recent Games</h3>
           <div id="profile-recent-list" class="recent-games-list">No games yet</div>
         </div>
-
-        <button class="menu-btn leaderboard-btn" onclick="UI.showHistory()" style="margin-top:1rem" aria-label="View full match history">Full Match History</button>\      </div>
-    </div>
-  </div>
-
-  <!-- ═══════ MATCH HISTORY SCREEN ═══════ -->
-  <div id="history-screen" class="screen">
-    <div class="history-container">
-      <div class="history-header">
-        <button class="icon-btn" onclick="UI.showScreen('profile-screen')">← Back</button>
-        <h1>Match History</h1>
-        <div style="width:70px"></div>
       </div>
-      <div id="history-filters" class="history-filters">
-        <button class="diff-btn active" data-filter="all" onclick="UI.filterHistory(this)">All</button>
-        <button class="diff-btn" data-filter="win" onclick="UI.filterHistory(this)">Wins</button>
-        <button class="diff-btn" data-filter="loss" onclick="UI.filterHistory(this)">Losses</button>
-        <button class="diff-btn" data-filter="draw" onclick="UI.filterHistory(this)">Draws</button>
-      </div>
-      <div id="history-list" class="history-list">
-        <div class="lb-loading">Login to view your match history</div>
-      </div>
-      <div id="history-pagination" class="history-pagination"></div>
     </div>
   </div>
 
@@ -315,24 +289,10 @@
     </div>
   </div>
 
-  <!-- ═══════ TUTORIAL OVERLAY ═══════ -->
-  <div class="overlay" id="tutorial-overlay">
-    <div class="overlay-card tutorial-card">
-      <div class="tutorial-step-counter" id="tutorial-counter">Step 1 of 5</div>
-      <div class="tutorial-visual" id="tutorial-visual"></div>
-      <h2 id="tutorial-title">Welcome to Osero!</h2>
-      <p id="tutorial-text" class="tutorial-text"></p>
-      <div class="tutorial-actions">
-        <button class="menu-btn local-btn" id="tutorial-skip" onclick="UI.endTutorial()" style="background:transparent;border-color:var(--card-border)">Skip</button>
-        <button class="menu-btn black-btn" id="tutorial-next" onclick="UI.nextTutorialStep()">Next</button>
-      </div>
-    </div>
-  </div>
-
   <!-- ═══════ RULES MODAL ═══════ -->
   <div class="overlay" id="rules-overlay">
     <div class="overlay-card rules-card">
-      <h2><svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>How to Play Osero</h2>
+      <h2>❓ How to Play Osero</h2>
       <div class="rules-content">
         <p><strong>Osero</strong> (also called Othello or Reversi) is a strategy game for two players on an 8×8 board.</p>
         <h3>🎯 Goal</h3>
@@ -359,7 +319,7 @@
   <!-- ═══════ LOGIN MODAL ═══════ -->
   <div class="overlay" id="login-overlay">
     <div class="overlay-card">
-      <h2><svg class="icon-svg" viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>Login</h2>
+      <h2>🔑 Login</h2>
       <input type="text" id="login-username" class="text-input" placeholder="Username" maxlength="20" autocomplete="username">
       <input type="password" id="login-password" class="text-input" placeholder="Password" autocomplete="current-password">
       <button class="menu-btn black-btn" onclick="Auth.login()" id="login-btn">Login</button>
@@ -372,7 +332,7 @@
   <!-- ═══════ REGISTER MODAL ═══════ -->
   <div class="overlay" id="register-overlay">
     <div class="overlay-card">
-      <h2><svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3z"/></svg>Sign Up</h2>
+      <h2>✨ Sign Up</h2>
       <input type="text" id="register-username" class="text-input" placeholder="Username (3-20 chars)" maxlength="20" autocomplete="username">
       <input type="text" id="register-display" class="text-input" placeholder="Display name (optional)" maxlength="30">
       <input type="password" id="register-password" class="text-input" placeholder="Password (4+ chars)" autocomplete="new-password">
@@ -387,15 +347,15 @@
   <!-- ═══════ ONLINE MENU MODAL ═══════ -->
   <div class="overlay" id="online-menu-overlay">
     <div class="overlay-card">
-      <h2><svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Play Online</h2>
+      <h2>🌍 Play Online</h2>
       <input type="text" id="online-nickname" class="text-input" placeholder="Your nickname" maxlength="16">
       <div class="online-section">
-        <button class="menu-btn local-btn" onclick="OnlineGame.createRoom()"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Create Room</button>
+        <button class="menu-btn local-btn" onclick="OnlineGame.createRoom()">🏠 Create Room</button>
       </div>
       <div class="online-divider">— or join —</div>
       <div class="online-section">
         <input type="text" id="join-room-code" class="text-input" placeholder="Room code (e.g. FROG3)" maxlength="8" style="text-transform:uppercase">
-        <button class="menu-btn black-btn" onclick="OnlineGame.joinRoom()" style="margin-top:0.5rem"><svg class="icon-svg" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>Join Room</button>
+        <button class="menu-btn black-btn" onclick="OnlineGame.joinRoom()" style="margin-top:0.5rem">➡️ Join Room</button>
       </div>
       <button class="menu-btn local-btn" onclick="UI.hideOnlineMenu()" style="margin-top:0.75rem;background:transparent;border-color:var(--card-border)">Cancel</button>
       <p id="online-error" class="online-error"></p>
@@ -405,7 +365,7 @@
   <!-- ═══════ WAITING ROOM OVERLAY ═══════ -->
   <div class="overlay" id="waiting-overlay">
     <div class="overlay-card">
-      <h2><svg class="icon-svg" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Waiting for opponent</h2>
+      <h2>🏠 Waiting for opponent</h2>
       <p class="waiting-info">Share this code with your friend:</p>
       <div class="room-code" id="room-code-display">----</div>
       <p class="waiting-sub" id="waiting-subtitle">You are ⚫ Black</p>
@@ -425,6 +385,6 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="auth.js?v=2"></script>
-  <script src="game.js?v=3"></script>
+  <script src="game.js?v=2"></script>
 </body>
 </html>
