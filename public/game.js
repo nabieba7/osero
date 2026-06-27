@@ -595,9 +595,11 @@ const UI = {
   tutorialStep: 0,
 
   showTutorial() {
+    alert('Tutorial starting!'); // DEBUG
     this.tutorialStep = 0;
     this.renderTutorialStep();
-    document.getElementById('tutorial-overlay').classList.add('active');
+    const overlay = document.getElementById('tutorial-overlay');
+    if (overlay) overlay.classList.add('active');
   },
 
   renderTutorialStep() {
@@ -1179,4 +1181,5 @@ const OnlineGame = {
 // ── Init ──
 UI.loadTheme();
 Auth.init();
-UI.checkTutorial();
+// Tutorial auto-check disabled for now — use menu button
+// UI.checkTutorial();
