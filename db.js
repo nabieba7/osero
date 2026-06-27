@@ -70,11 +70,23 @@ const getUserStats = db.prepare(`
 `);
 
 const getUserRecentGames = db.prepare(`
-  SELECT mode, player_color, result, player_score, opponent_score, difficulty, opponent_name, played_at
+  SELECT mode, player_color, result, player_score, opponent_score, difficulty, opponent_name, played_at, duration_seconds
   FROM games
   WHERE user_id = ?
   ORDER BY played_at DESC
   LIMIT ?
+`);
+
+const getUserGameHistory = db.prepare(`
+  SELECT id, mode, player_color, result, player_score, opponent_score, difficulty, opponent_name, duration_seconds, played_at
+  FROM games
+  WHERE user_id = ?
+  ORDER BY played_at DESC
+  LIMIT ? OFFSET ?
+`);
+
+const getUserGameCount = db.prepare(`
+  SELECT COUNT(*) as total FROM games WHERE user_id = ?
 `);
 
 const getLeaderboard = db.prepare(`
@@ -120,6 +132,8 @@ module.exports = {
   saveGame,
   getUserStats,
   getUserRecentGames,
+  getUserGameHistory,
+  getUserGameCount,
   getLeaderboard,
   getUserRank
 };

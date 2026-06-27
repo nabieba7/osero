@@ -5,7 +5,7 @@ const path = require('path');
 const { authMiddleware, requireAuth, hashPassword, verifyPassword, generateToken } = require('./auth');
 const {
   db, createUser, getUserByUsername, getUserById, updateUserProfile,
- saveGame, getUserStats, getUserRecentGames,
+ saveGame, getUserStats, getUserRecentGames, getUserGameHistory, getUserGameCount,
  getLeaderboard, getUserRank
 } = require('./db');
 
@@ -109,6 +109,24 @@ app.get('/api/stats', authMiddleware, requireAuth, (req, res) => {
   const recent = getUserRecentGames.all(req.user.id, 20);
   const rankRow = getUserRank.get(req.user.id);
   res.json({ ...stats, rank: rankRow ? rankRow.rank : null, recentGames: recent });
+});
+
+// ── Game History API (paginated) ──
+app.get('/api/games/history', authMiddleware, requireAuth, (req, res) => {
+  const page = Math.max(1, parseInt(req.query.page) || 1);
+  const perPage = Math.min(Math.max(1, parseInt(req.query.perPage) || 20), 50);
+  const offset = (page - 1) * perPage;
+  const total = getUserGameCount.get(req.user.id).total;
+  const games = getUserGameHistory.all(req.user.id, perPage, offset);
+  res.json({
+    games,
+    pagination: {
+      page,
+      perPage,
+      total,
+      totalPages: Math.ceil(total / perPage)
+    }
+  });
 });
 
 // ── Admin API ──
