@@ -181,8 +181,9 @@ class OthelloAI {
   }
 
   getSearchDepth(empty) {
-    if (empty <= 14) return Math.min(8, empty);
-    if (empty <= 20) return 6;
+    const scale = this.baseDepth / 4; // 0.5 easy, 0.75 med, 1.0 hard, 1.5 expert
+    if (empty <= 14) return Math.min(Math.round(8 * scale), empty);
+    if (empty <= 20) return Math.round(6 * scale);
     return this.baseDepth;
   }
 
@@ -301,6 +302,15 @@ class OthelloAI {
   getBestMove(state, aiPlayer) {
     const depth = this.getSearchDepth(state.emptyCount());
     const result = this.minimax(state, depth, -Infinity, Infinity, true, aiPlayer);
+
+    // Easy mode: 30% chance to pick a random legal move instead of optimal
+    if (this.baseDepth <= 2 && Math.random() < 0.3) {
+      const moves = state.getLegalMoves(aiPlayer);
+      if (moves.length > 1) {
+        return moves[Math.floor(Math.random() * moves.length)];
+      }
+    }
+
     return result.move;
   }
 }
@@ -522,6 +532,9 @@ const UI = {
     const menuBtn = document.querySelector('.theme-toggle-menu');
     if (btn) btn.textContent = label;
     if (menuBtn) menuBtn.textContent = label + ' Theme';
+    // Update theme-color meta for mobile browsers
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = isLight ? '#0f0f1a' : '#c8b88a';
   },
 
   loadTheme() {
@@ -532,6 +545,9 @@ const UI = {
     const menuBtn = document.querySelector('.theme-toggle-menu');
     if (btn) btn.textContent = label;
     if (menuBtn) menuBtn.textContent = label + ' Theme';
+    // Set correct theme-color meta on load
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = saved === 'light' ? '#c8b88a' : '#0f0f1a';
   },
 
  showOnlineMenu() {

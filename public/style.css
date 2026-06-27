@@ -45,7 +45,6 @@
   --player-white-border: rgba(245, 240, 232, 0.15);
   --active-glow: rgba(212, 168, 67, 0.3);
 }
-}
 
 /* ── LIGHT THEME (bright felt table) ── */
 [data-theme="light"] {
