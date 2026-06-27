@@ -674,6 +674,7 @@ body {
   justify-content: center;
   cursor: pointer;
   position: relative;
+  perspective: 400px;
   transition: background 0.15s;
 }
 
@@ -761,7 +762,6 @@ body {
   height: 82%;
   border-radius: 50%;
   position: absolute;
-  transition: transform 0.4s ease;
   transform-style: preserve-3d;
   z-index: 2;
 }
