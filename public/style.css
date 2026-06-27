@@ -674,7 +674,6 @@ body {
   justify-content: center;
   cursor: pointer;
   position: relative;
-  perspective: 400px;
   transition: background 0.15s;
 }
 
@@ -708,9 +707,7 @@ body {
   width: 82%;
   height: 82%;
   border-radius: 50%;
-  position: absolute;
-  top: 9%;
-  left: 9%;
+  position: relative;
   opacity: 0;
   transform: scale(0.6);
   transition: opacity 0.2s ease, transform 0.2s ease;
@@ -728,9 +725,6 @@ body {
 .cell.last-move::after {
   content: '';
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   width: 8px;
   height: 8px;
   border-radius: 50%;
@@ -745,9 +739,7 @@ body {
   width: 28%;
   height: 28%;
   border-radius: 50%;
-  position: absolute;
-  top: 36%;
-  left: 36%;
+  position: relative;
   opacity: 0.35;
   pointer-events: none;
   animation: hintPulse 2s ease-in-out infinite;
@@ -769,10 +761,7 @@ body {
   width: 82%;
   height: 82%;
   border-radius: 50%;
-  position: absolute;
-  top: 9%;
-  left: 9%;
-  transform-style: preserve-3d;
+  position: relative;
   z-index: 2;
 }
 
@@ -797,10 +786,10 @@ body {
 }
 
 @keyframes flipDisc {
-  0% { transform: rotateY(0deg) scale(1); }
-  40% { transform: rotateY(90deg) scale(1.08); }
-  60% { transform: rotateY(90deg) scale(1.08); }
-  100% { transform: rotateY(0deg) scale(1); }
+  0% { transform: scaleX(1) scale(1); }
+  40% { transform: scaleX(0.05) scale(1.08); }
+  60% { transform: scaleX(0.05) scale(1.08); }
+  100% { transform: scaleX(1) scale(1); }
 }
 
 .disc.placing { animation: placeDisc 0.3s ease-out; }
