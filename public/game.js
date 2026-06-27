@@ -1274,12 +1274,30 @@ const OnlineGame = {
 };
 
 // ── Init ──
-UI.loadTheme();
-Auth.init();
-UI.checkTutorial();
+try { UI.loadTheme(); } catch(e) { console.error('loadTheme error:', e); }
+try { Auth.init(); } catch(e) { console.error('Auth.init error:', e); }
+try { UI.checkTutorial(); } catch(e) { console.error('checkTutorial error:', e); }
 
 // Fallback: ensure tutorial button works even if onclick fails
 const tutBtn = document.getElementById('tutorial-menu-btn');
 if (tutBtn) {
   tutBtn.addEventListener('click', () => UI.showTutorial());
 }
+
+// Debug: catch errors in game start
+globalThis.__oseroDebug = true;
+const origStart = Game.start.bind(Game);
+Game.start = function(...args) {
+  try {
+    console.log('Game.start called with:', args);
+    const result = origStart(...args);
+    const board = document.getElementById('board');
+    console.log('Board children after start:', board ? board.children.length : 'no board');
+    console.log('Board innerHTML length:', board ? board.innerHTML.length : 'no board');
+    return result;
+  } catch(e) {
+    console.error('Game.start error:', e);
+    alert('Game error: ' + e.message);
+    throw e;
+  }
+};
