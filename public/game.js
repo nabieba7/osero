@@ -336,6 +336,8 @@ const UI = {
         cell.className = 'cell';
         cell.dataset.row = r;
         cell.dataset.col = c;
+        cell.setAttribute('role', 'gridcell');
+        cell.setAttribute('aria-label', `${COL_LETTERS[c]}${r + 1}${state.grid[r][c] !== EMPTY ? (state.grid[r][c] === BLACK ? ' Black' : ' White') : isLegal ? ' Available move' : ' Empty'}`);
 
         // Alternating cell parity for subtle depth
         if ((r + c) % 2 === 1) {

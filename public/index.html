@@ -33,7 +33,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./style.css?v=2">
+  <link rel="stylesheet" href="./style.css?v=3">
 
   <!-- Structured Data for Google Rich Results -->
   <script type="application/ld+json">
@@ -69,7 +69,10 @@
   </script>
 
 </head>
-<body>
+<body role="main">
+
+  <!-- Skip link for keyboard users -->
+  <a href="#menu-screen" class="skip-link">Skip to main content</a>
 
   <!-- ═══════ MENU SCREEN ═══════ -->
   <div id="menu-screen" class="screen active">
@@ -93,36 +96,36 @@
 
       <div class="menu-section">
         <h2>vs AI</h2>
-        <button class="menu-btn black-btn" onclick="Game.start('ai', 'black')">
+        <button class="menu-btn black-btn" onclick="Game.start('ai', 'black')" aria-label="Play as Black against AI">
           ⚫ Play as Black
         </button>
-        <button class="menu-btn white-btn" onclick="Game.start('ai', 'white')">
+        <button class="menu-btn white-btn" onclick="Game.start('ai', 'white')" aria-label="Play as White against AI">
           ⚪ Play as White
         </button>
       </div>
 
       <div class="menu-section">
         <h2>vs Player</h2>
-        <button class="menu-btn local-btn" onclick="Game.start('pvp')">
+        <button class="menu-btn local-btn" onclick="Game.start('pvp')" aria-label="Start local 2-player game">
           👥 Local 2-Player
         </button>
       </div>
       <div class="menu-section">
         <h2>Online</h2>
-        <button class="menu-btn online-btn" onclick="UI.showOnlineMenu()">
+        <button class="menu-btn online-btn" onclick="UI.showOnlineMenu()" aria-label="Play online with friends">
           🌍 Play Online
         </button>
       </div>
 
       <div class="menu-section">
         <h2>Rankings</h2>
-        <button class="menu-btn leaderboard-btn" onclick="UI.showLeaderboard()">
+        <button class="menu-btn leaderboard-btn" onclick="UI.showLeaderboard()" aria-label="View leaderboard rankings">
           🏆 Leaderboard
         </button>
       </div>
 
-      <button class="rules-btn" onclick="UI.showRules()">❓ Rules</button>
-      <button class="theme-toggle-menu" onclick="UI.toggleTheme()">🌙 Theme</button>
+      <button class="rules-btn" onclick="UI.showRules()" aria-label="How to play rules">❓ Rules</button>
+      <button class="theme-toggle-menu" onclick="UI.toggleTheme()" aria-label="Toggle light and dark theme">🌙 Theme</button>
 
       <div class="menu-section">
         <label class="difficulty-label">AI Difficulty</label>
@@ -141,15 +144,15 @@
 
       <!-- Top bar -->
       <div class="top-bar">
-        <button class="icon-btn" onclick="Game.backToMenu()" title="Back to Menu">← Menu</button>
+        <button class="icon-btn" onclick="Game.backToMenu()" title="Back to Menu" aria-label="Back to menu">← Menu</button>
         <div class="turn-indicator" id="turn-indicator">
           <span class="turn-disc black-disc-small"></span>
           <span id="turn-text">Black's turn</span>
         </div>
         <div class="top-bar-right">
-          <button class="icon-btn" onclick="UI.toggleTheme()" id="theme-btn" title="Toggle theme">🌙</button>
-          <button class="icon-btn" onclick="UI.toggleHints()" id="hints-btn" title="Toggle hints">👁</button>
-          <button class="icon-btn" onclick="Game.restart()" title="Restart">↻</button>
+          <button class="icon-btn" onclick="UI.toggleTheme()" id="theme-btn" title="Toggle theme" aria-label="Toggle theme">🌙</button>
+          <button class="icon-btn" onclick="UI.toggleHints()" id="hints-btn" title="Toggle hints" aria-label="Toggle move hints">👁</button>
+          <button class="icon-btn" onclick="Game.restart()" title="Restart" aria-label="Restart game">↻</button>
         </div>
       </div>
 
@@ -197,7 +200,7 @@
             <span>1</span><span>2</span><span>3</span><span>4</span>
             <span>5</span><span>6</span><span>7</span><span>8</span>
           </div>
-          <div class="board" id="board"></div>
+          <div class="board" id="board" role="grid" aria-label="Othello game board"></div>
         </div>
       </div>
 
