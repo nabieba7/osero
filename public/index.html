@@ -122,6 +122,7 @@
       </div>
 
       <button class="rules-btn" onclick="UI.showRules()">❓ Rules</button>
+      <button class="rules-btn" onclick="UI.showTutorial()" style="margin-left:0.5rem">📖 Tutorial</button>
       <button class="theme-toggle-menu" onclick="UI.toggleTheme()">🌙 Theme</button>
 
       <div class="menu-section">
@@ -285,6 +286,19 @@
       <div class="overlay-actions">
         <button class="menu-btn black-btn" onclick="Game.restart()">Play Again</button>
         <button class="menu-btn local-btn" onclick="Game.backToMenu()">Main Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ TUTORIAL OVERLAY ═══════ -->
+  <div class="overlay" id="tutorial-overlay">
+    <div class="overlay-card">
+      <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-muted);margin-bottom:0.75rem" id="tutorial-counter">Step 1 of 5</div>
+      <h2 id="tutorial-title">Welcome to Osero!</h2>
+      <p id="tutorial-text" style="font-size:0.95rem;line-height:1.6;color:var(--text-muted);margin-bottom:1.25rem"></p>
+      <div style="display:flex;gap:0.5rem;justify-content:flex-end">
+        <button class="menu-btn" onclick="UI.endTutorial()" style="background:transparent;border:1px solid var(--card-border)">Skip</button>
+        <button class="menu-btn black-btn" id="tutorial-next" onclick="UI.nextTutorialStep()">Next</button>
       </div>
     </div>
   </div>

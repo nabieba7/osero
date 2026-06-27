@@ -584,6 +584,50 @@ const UI = {
     document.getElementById('register-overlay').classList.remove('active');
   },
 
+  // ── Tutorial ──
+  tutorialSteps: [
+    { title: 'Welcome to Osero!', text: 'Place discs to flip your opponent\'s pieces to your color. The player with the most discs at the end wins!' },
+    { title: 'Sandwich to Flip', text: 'You must place your disc so it sandwiches at least one opponent disc in a straight line — horizontally, vertically, or diagonally.' },
+    { title: 'Chain Flips', text: 'If your move sandwiches discs in multiple directions, ALL of them flip at once. One great move can change the whole board!' },
+    { title: 'Corner = Power', text: 'A disc in a corner can never be flipped. Corners are the most powerful squares — always try to take one!' },
+    { title: 'You\'re Ready!', text: 'If you have no legal moves, your turn is skipped. The game ends when neither player can move, or the board is full. Good luck!' }
+  ],
+  tutorialStep: 0,
+
+  showTutorial() {
+    this.tutorialStep = 0;
+    this.renderTutorialStep();
+    document.getElementById('tutorial-overlay').classList.add('active');
+  },
+
+  renderTutorialStep() {
+    const step = this.tutorialSteps[this.tutorialStep];
+    document.getElementById('tutorial-counter').textContent = 'Step ' + (this.tutorialStep + 1) + ' of ' + this.tutorialSteps.length;
+    document.getElementById('tutorial-title').textContent = step.title;
+    document.getElementById('tutorial-text').textContent = step.text;
+    document.getElementById('tutorial-next').textContent = this.tutorialStep === this.tutorialSteps.length - 1 ? "Let's Play!" : 'Next';
+  },
+
+  nextTutorialStep() {
+    this.tutorialStep++;
+    if (this.tutorialStep >= this.tutorialSteps.length) {
+      this.endTutorial();
+    } else {
+      this.renderTutorialStep();
+    }
+  },
+
+  endTutorial() {
+    document.getElementById('tutorial-overlay').classList.remove('active');
+    localStorage.setItem('osero-tutorial-done', 'true');
+  },
+
+  checkTutorial() {
+    if (!localStorage.getItem('osero-tutorial-done')) {
+      this.showTutorial();
+    }
+  },
+
   async showLeaderboard() {
     this.showScreen('leaderboard-screen');
     const container = document.getElementById('leaderboard-table');
@@ -1135,3 +1179,4 @@ const OnlineGame = {
 // ── Init ──
 UI.loadTheme();
 Auth.init();
+UI.checkTutorial();
