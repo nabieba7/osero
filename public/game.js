@@ -337,6 +337,8 @@ const UI = {
         cell.dataset.row = r;
         cell.dataset.col = c;
         cell.setAttribute('role', 'gridcell');
+        const isLegal = legal.some(([mr, mc]) => mr === r && mc === c);
+
         cell.setAttribute('aria-label', `${COL_LETTERS[c]}${r + 1}${state.grid[r][c] !== EMPTY ? (state.grid[r][c] === BLACK ? ' Black' : ' White') : isLegal ? ' Available move' : ' Empty'}`);
 
         // Alternating cell parity for subtle depth
@@ -352,8 +354,6 @@ const UI = {
         if (state.lastMove && state.lastMove[0] === r && state.lastMove[1] === c) {
           cell.classList.add('last-move');
         }
-
-        const isLegal = legal.some(([mr, mc]) => mr === r && mc === c);
 
         if (state.grid[r][c] !== EMPTY) {
           const disc = document.createElement('div');
