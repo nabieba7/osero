@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
   <!-- Primary SEO -->
-  <title>Osero — Play Othello (Reversi) Online Free | AI & Multiplayer</title>
-  <meta name="description" content="Play Othello (Reversi) free online — challenge AI with adjustable difficulty, play local 2-player, or battle friends online. No download needed. Track your ranking on the leaderboard.">
+  <title>Osero — Play Othello Online Free | Beat AI, Challenge Friends, Climb the Leaderboard</title>
+  <meta name="description" content="Free Othello & Reversi — no signup needed. Play vs smart AI (3 difficulty levels), local 2-player, or online multiplayer with real-time matchmaking. Track wins, earn your rank. ⚫⚪">
   <meta name="keywords" content="othello, reversi, osero, play othello online, reversi online free, board game, strategy game, multiplayer othello, othello ai">
   <link rel="canonical" href="https://osero-reverse.com/">
 
   <!-- Open Graph (Facebook, LinkedIn, Discord, etc.) -->
-  <meta property="og:title" content="Osero — Play Othello Online Free">
-  <meta property="og:description" content="Challenge AI, play friends online, or go local 2-player. Free Othello/Reversi with leaderboard & accounts.">
+  <meta property="og:title" content="Osero — Free Othello & Reversi Online">
+  <meta property="og:description" content="Play Othello free — smart AI, online multiplayer, leaderboard rankings. No download, no signup to start. ⚫⚪">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://osero-reverse.com">
   <meta property="og:image" content="https://osero-reverse.com/og-image.png">
@@ -23,12 +23,13 @@
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Osero — Play Othello Online Free">
-  <meta name="twitter:description" content="Challenge AI, play friends online, or go local 2-player. Free Othello/Reversi with leaderboard & accounts.">
+  <meta name="twitter:title" content="Osero — Free Othello & Reversi Online">
+  <meta name="twitter:description" content="Play Othello free — smart AI, online multiplayer, leaderboard rankings. No download, no signup to start. ⚫⚪">
   <meta name="twitter:image" content="https://osero-reverse.com/og-image.png">
 
   <!-- Theme color for mobile browsers -->
-  <meta name="theme-color" content="#0f0f1a">
+  <meta name="theme-color" content="#0b0e14" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f5f6fa" media="(prefers-color-scheme: light)">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -122,14 +123,13 @@
       </div>
 
       <button class="rules-btn" onclick="UI.showRules()">❓ Rules</button>
-      <button class="rules-btn" onclick="UI.showTutorial()" style="margin-left:0.5rem">📖 Tutorial</button>
       <button class="theme-toggle-menu" onclick="UI.toggleTheme()">🌙 Theme</button>
 
       <div class="menu-section">
         <label class="difficulty-label">AI Difficulty</label>
         <div class="difficulty-select">
-          <button class="diff-btn active" data-depth="2" onclick="Game.setDifficulty(this)">Easy</button>
-          <button class="diff-btn" data-depth="4" onclick="Game.setDifficulty(this)">Medium</button>
+          <button class="diff-btn" data-depth="2" onclick="Game.setDifficulty(this)">Easy</button>
+          <button class="diff-btn active" data-depth="4" onclick="Game.setDifficulty(this)">Medium</button>
           <button class="diff-btn" data-depth="6" onclick="Game.setDifficulty(this)">Hard</button>
         </div>
       </div>
@@ -286,19 +286,6 @@
       <div class="overlay-actions">
         <button class="menu-btn black-btn" onclick="Game.restart()">Play Again</button>
         <button class="menu-btn local-btn" onclick="Game.backToMenu()">Main Menu</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══════ TUTORIAL OVERLAY ═══════ -->
-  <div class="overlay" id="tutorial-overlay">
-    <div class="overlay-card">
-      <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-muted);margin-bottom:0.75rem" id="tutorial-counter">Step 1 of 5</div>
-      <h2 id="tutorial-title">Welcome to Osero!</h2>
-      <p id="tutorial-text" style="font-size:0.95rem;line-height:1.6;color:var(--text-muted);margin-bottom:1.25rem"></p>
-      <div style="display:flex;gap:0.5rem;justify-content:flex-end">
-        <button class="menu-btn" onclick="UI.endTutorial()" style="background:transparent;border:1px solid var(--card-border)">Skip</button>
-        <button class="menu-btn black-btn" id="tutorial-next" onclick="UI.nextTutorialStep()">Next</button>
       </div>
     </div>
   </div>
