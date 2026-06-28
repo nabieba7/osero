@@ -522,6 +522,14 @@ const UI = {
     document.getElementById('move-log').innerHTML = '';
   },
 
+  updateUndoButton() {
+    const btn = document.getElementById('undo-btn');
+    if (!btn) return;
+    btn.disabled = !Game.canUndo;
+    btn.style.opacity = Game.canUndo ? '1' : '0.35';
+    btn.style.pointerEvents = Game.canUndo ? 'auto' : 'none';
+  },
+
   toggleTheme() {
     const html = document.documentElement;
     const isLight = html.getAttribute('data-theme') === 'light';
@@ -713,6 +721,8 @@ const Game = {
   aiThinking: false,
   difficulty: 4,
   endgameCommentShown: false,
+  history: [],       // board state snapshots for undo
+  canUndo: false,     // whether undo is available
 
   setDifficulty(btn) {
     document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
@@ -726,6 +736,8 @@ const Game = {
     this.ai = new OthelloAI(this.difficulty);
     this.aiThinking = false;
     this.endgameCommentShown = false;
+    this.history = [];
+    this.canUndo = false;
     this.state = new BoardState();
     startTimer();
 
@@ -746,6 +758,8 @@ const Game = {
     this.playerColor = OnlineGame.myColor;
     this.aiThinking = false;
     this.endgameCommentShown = false;
+    this.history = [];
+    this.canUndo = false;
     this.state = new BoardState();
     startTimer();
 
@@ -776,6 +790,8 @@ const Game = {
     UI.showScreen('menu-screen');
     this.state = null;
     this.aiThinking = false;
+    this.history = [];
+    this.canUndo = false;
     if (this.mode === 'online') {
       OnlineGame.disconnect();
     }
@@ -799,6 +815,12 @@ const Game = {
 
   executeMove(r, c) {
     const player = this.state.currentPlayer;
+
+    // Save snapshot before move for undo
+    this.history.push(this.state.clone());
+    this.canUndo = true;
+    UI.updateUndoButton();
+
     const flips = this.state.makeMove(r, c, player);
 
     UI.addMoveLog(player, r, c);
@@ -911,6 +933,34 @@ const Game = {
     }
 
     this.endGame();
+  },
+
+  undo() {
+    if (!this.canUndo || this.history.length === 0 || this.aiThinking) return;
+    if (this.mode === 'online') return; // no undo in online
+
+    if (this.mode === 'ai') {
+      // Undo both AI move + player move (go back to before player's last move)
+      // We need to pop 2 states: the AI's move and the player's move
+      if (this.history.length >= 2) {
+        this.history.pop(); // AI's move state
+        this.state = this.history.pop(); // player's move state (before player moved)
+      } else if (this.history.length === 1) {
+        // Edge case: only one move made (player went first, AI hasn't moved yet)
+        this.state = this.history.pop();
+      }
+      this.canUndo = this.history.length > 0;
+    } else {
+      // PvP: undo just the last move
+      this.state = this.history.pop();
+      this.canUndo = this.history.length > 0;
+    }
+
+    this.endgameCommentShown = false;
+    UI.updateUndoButton();
+    UI.renderBoard(this.state);
+    UI.updateScore(this.state);
+    UI.updateTurn(this.state);
   },
 
   scheduleAI() {
