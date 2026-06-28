@@ -5,6 +5,144 @@
 const EMPTY = 0, BLACK = 1, WHITE = 2;
 const DIRS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
 const COL_LETTERS = 'ABCDEFGH';
+
+// ── Sound Effects (Web Audio API — no files needed) ──
+const SFX = {
+  ctx: null,
+  enabled: true,
+
+  init() {
+    try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+  },
+
+  resume() {
+    if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+  },
+
+  // Soft click when placing a disc
+  place() {
+    if (!this.enabled || !this.ctx) return;
+    this.resume();
+    const o = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    o.connect(g); g.connect(this.ctx.destination);
+    o.type = 'sine';
+    o.frequency.setValueAtTime(520, this.ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(380, this.ctx.currentTime + 0.08);
+    g.gain.setValueAtTime(0.15, this.ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
+    o.start(); o.stop(this.ctx.currentTime + 0.1);
+  },
+
+  // Quick flap sound for each flip
+  flip() {
+    if (!this.enabled || !this.ctx) return;
+    this.resume();
+    const o = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    o.connect(g); g.connect(this.ctx.destination);
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(800, this.ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(400, this.ctx.currentTime + 0.06);
+    g.gain.setValueAtTime(0.08, this.ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
+    o.start(); o.stop(this.ctx.currentTime + 0.08);
+  },
+
+  // Descending tone for skip
+  skip() {
+    if (!this.enabled || !this.ctx) return;
+    this.resume();
+    const o = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    o.connect(g); g.connect(this.ctx.destination);
+    o.type = 'sine';
+    o.frequency.setValueAtTime(440, this.ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(220, this.ctx.currentTime + 0.25);
+    g.gain.setValueAtTime(0.12, this.ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.3);
+    o.start(); o.stop(this.ctx.currentTime + 0.3);
+  },
+
+  // Victory jingle
+  win() {
+    if (!this.enabled || !this.ctx) return;
+    this.resume();
+    const notes = [523, 659, 784, 1047]; // C5 E5 G5 C6
+    notes.forEach((freq, i) => {
+      const o = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      o.connect(g); g.connect(this.ctx.destination);
+      o.type = 'sine';
+      const t = this.ctx.currentTime + i * 0.12;
+      o.frequency.setValueAtTime(freq, t);
+      g.gain.setValueAtTime(0.12, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+      o.start(t); o.stop(t + 0.3);
+    });
+  },
+
+  // Sad descending tone for loss
+  lose() {
+    if (!this.enabled || !this.ctx) return;
+    this.resume();
+    const notes = [440, 370, 311, 262]; // A4 F#4 D#4 C4
+    notes.forEach((freq, i) => {
+      const o = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      o.connect(g); g.connect(this.ctx.destination);
+      o.type = 'sine';
+      const t = this.ctx.currentTime + i * 0.15;
+      o.frequency.setValueAtTime(freq, t);
+      g.gain.setValueAtTime(0.1, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+      o.start(t); o.stop(t + 0.3);
+    });
+  },
+
+  // Neutral two-tone for draw
+  draw() {
+    if (!this.enabled || !this.ctx) return;
+    this.resume();
+    [440, 440].forEach((freq, i) => {
+      const o = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      o.connect(g); g.connect(this.ctx.destination);
+      o.type = 'sine';
+      const t = this.ctx.currentTime + i * 0.2;
+      o.frequency.setValueAtTime(freq, t);
+      g.gain.setValueAtTime(0.1, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+      o.start(t); o.stop(t + 0.25);
+    });
+  },
+
+  // Soft click for undo
+  undo() {
+    if (!this.enabled || !this.ctx) return;
+    this.resume();
+    const o = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    o.connect(g); g.connect(this.ctx.destination);
+    o.type = 'sine';
+    o.frequency.setValueAtTime(380, this.ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(520, this.ctx.currentTime + 0.08);
+    g.gain.setValueAtTime(0.1, this.ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
+    o.start(); o.stop(this.ctx.currentTime + 0.1);
+  },
+
+  toggle() {
+    this.enabled = !this.enabled;
+    localStorage.setItem('osero-sfx', this.enabled ? 'on' : 'off');
+    UI.updateSoundButton();
+  },
+
+  load() {
+    const saved = localStorage.getItem('osero-sfx');
+    if (saved === 'off') this.enabled = false;
+  }
+};
 // Game timer
 let gameStartTime = null;
 let timerInterval = null;
@@ -426,6 +564,7 @@ const UI = {
     const delay = 70;
     flips.forEach(([r, c], i) => {
       setTimeout(() => {
+        SFX.flip();
         const disc = document.getElementById(`disc-${r}-${c}`);
         if (!disc) return;
         disc.classList.add('flipping');
@@ -528,6 +667,12 @@ const UI = {
     btn.disabled = !Game.canUndo;
     btn.style.opacity = Game.canUndo ? '1' : '0.35';
     btn.style.pointerEvents = Game.canUndo ? 'auto' : 'none';
+  },
+
+  updateSoundButton() {
+    const btn = document.getElementById('sound-btn');
+    if (!btn) return;
+    btn.textContent = SFX.enabled ? '🔊' : '🔇';
   },
 
   toggleTheme() {
@@ -731,6 +876,7 @@ const Game = {
   },
 
   start(mode, playerColor) {
+    SFX.resume();
     this.mode = mode;
     this.playerColor = playerColor === 'black' ? BLACK : WHITE;
     this.ai = new OthelloAI(this.difficulty);
@@ -824,6 +970,7 @@ const Game = {
     const flips = this.state.makeMove(r, c, player);
 
     UI.addMoveLog(player, r, c);
+    SFX.place();
     UI.animatePlacement(r, c, player);
 
     UI.animateFlips(flips, player, () => {
@@ -914,6 +1061,7 @@ const Game = {
     if (opponentMoves.length > 0) {
       const skippedName = current === BLACK ? 'Black' : 'White';
       const nextName = opponent === BLACK ? 'Black' : 'White';
+      SFX.skip();
       UI.showSkipAnnounce(`${skippedName} has no moves — ${nextName} plays again`);
 
       if (this.mode === 'ai' && current === (this.playerColor === BLACK ? WHITE : BLACK)) {
@@ -957,6 +1105,7 @@ const Game = {
     }
 
     this.endgameCommentShown = false;
+    SFX.undo();
     UI.updateUndoButton();
     UI.renderBoard(this.state);
     UI.updateScore(this.state);
@@ -990,9 +1139,23 @@ const Game = {
     let result;
     const duration = Math.round((Date.now() - gameStartTime) / 1000);
 
-    if (bc > wc) result = 'Black wins!';
-    else if (wc > bc) result = 'White wins!';
-    else result = "It's a draw!";
+    if (bc > wc) {
+      result = 'Black wins!';
+      SFX.win();
+    } else if (wc > bc) {
+      result = 'White wins!';
+      SFX.win();
+    } else {
+      result = "It's a draw!";
+      SFX.draw();
+    }
+
+    // Play loss sound if player lost in AI mode
+    if (this.mode === 'ai') {
+      const myCount = this.playerColor === BLACK ? bc : wc;
+      const aiCount = this.playerColor === BLACK ? wc : bc;
+      if (myCount < aiCount) SFX.lose();
+    }
 
     // Save game result
     if (this.mode === 'ai' || this.mode === 'pvp') {
@@ -1229,7 +1392,10 @@ const OnlineGame = {
 };
 
 // ── Init ──
+SFX.load();
+SFX.init();
 UI.loadTheme();
+UI.updateSoundButton();
 Auth.init();
 // Tutorial auto-check disabled for now — use menu button
 // UI.checkTutorial();
