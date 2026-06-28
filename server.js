@@ -15,14 +15,48 @@ const io = new Server(server);
 
 const PORT = process.env.PORT || 3000;
 
+// ── Simple in-memory rate limiter ──
+const rateLimiter = {
+  attempts: {}, // key -> { count, firstAttempt }
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  maxAttempts: 10,
+
+  check(key) {
+    const now = Date.now();
+    const entry = this.attempts[key];
+    if (!entry || now - entry.firstAttempt > this.windowMs) {
+      this.attempts[key] = { count: 1, firstAttempt: now };
+      return false;
+    }
+    entry.count++;
+    return entry.count > this.maxAttempts;
+  },
+
+  // Clean up old entries every 10 minutes
+  cleanup() {
+    const now = Date.now();
+    for (const key of Object.keys(this.attempts)) {
+      if (now - this.attempts[key].firstAttempt > this.windowMs) {
+        delete this.attempts[key];
+      }
+    }
+  }
+};
+setInterval(() => rateLimiter.cleanup(), 10 * 60 * 1000);
+
 // Parse JSON bodies for API routes
 app.use(express.json());
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ── Auth API ──
+// ── Auth API with rate limiting ──
 app.post('/api/register', (req, res) => {
+  const rateKey = 'register:' + (req.ip || 'unknown');
+  if (rateLimiter.check(rateKey)) {
+    return res.status(429).json({ error: 'Too many attempts. Try again later.' });
+  }
+
   const { username, password, displayName } = req.body;
   if (!username || !password) {
     return res.status(400).json({ error: 'Username and password required' });
@@ -54,6 +88,11 @@ app.post('/api/register', (req, res) => {
 });
 
 app.post('/api/login', (req, res) => {
+  const rateKey = 'login:' + (req.ip || 'unknown');
+  if (rateLimiter.check(rateKey)) {
+    return res.status(429).json({ error: 'Too many attempts. Try again later.' });
+  }
+
   const { username, password } = req.body;
   if (!username || !password) {
     return res.status(400).json({ error: 'Username and password required' });
@@ -130,9 +169,16 @@ app.get('/api/games/history', authMiddleware, requireAuth, (req, res) => {
 });
 
 // ── Admin API ──
-const ADMIN_KEY = process.env.ADMIN_KEY || 'osero-admin-2026';
+// ADMIN_KEY MUST be set via environment variable. No hardcoded fallback.
+const ADMIN_KEY = process.env.ADMIN_KEY;
+if (!ADMIN_KEY && process.env.NODE_ENV === 'production') {
+  console.warn('⚠️  ADMIN_KEY not set — admin API endpoints are disabled.');
+}
 
 function requireAdmin(req, res, next) {
+  if (!ADMIN_KEY) {
+    return res.status(503).json({ error: 'Admin API is not configured' });
+  }
   const key = req.headers['x-admin-key'] || req.query.key;
   if (key !== ADMIN_KEY) {
     return res.status(403).json({ error: 'Invalid admin key' });
