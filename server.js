@@ -15,6 +15,14 @@ const io = new Server(server);
 
 const PORT = process.env.PORT || 3000;
 
+// ── Global error handlers ──
+process.on('uncaughtException', (err) => {
+  console.error('UNCAUGHT EXCEPTION:', err);
+});
+process.on('unhandledRejection', (err) => {
+  console.error('UNHANDLED REJECTION:', err);
+});
+
 // ── Simple in-memory rate limiter ──
 const rateLimiter = {
   attempts: {}, // key -> { count, firstAttempt }
@@ -49,6 +57,18 @@ app.use(express.json());
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
+
+// ── Request logging ──
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const ms = Date.now() - start;
+    if (res.statusCode >= 400) {
+      console.error(`${req.method} ${req.url} → ${res.statusCode} (${ms}ms)`);
+    }
+  });
+  next();
+});
 
 // ── Auth API with rate limiting ──
 app.post('/api/register', (req, res) => {
