@@ -124,6 +124,7 @@
 
       <button class="rules-btn" onclick="UI.showRules()">❓ Rules</button>
       <button class="rules-btn" onclick="UI.showContact()" style="margin-left:0.5rem">✉️ Contact</button>
+      <button class="rules-btn" onclick="UI.showScreen('admin-screen')" style="margin-left:0.5rem;font-size:0.8rem">⚙️</button>
       <button class="theme-toggle-menu" onclick="UI.toggleTheme()">🌙 Theme</button>
 
       <div class="menu-section">
@@ -387,6 +388,30 @@
     </div>
   </div>
 
+  <!-- ═══════ ADMIN MESSAGES SCREEN ═══════ -->
+  <div id="admin-screen" class="screen">
+    <div class="leaderboard-container">
+      <div class="leaderboard-header">
+        <button class="icon-btn" onclick="UI.showScreen('menu-screen')">← Back</button>
+        <h1>📨 Messages</h1>
+        <div style="width:70px"></div>
+      </div>
+      <div id="admin-login-section">
+        <div class="admin-login-card">
+          <p class="admin-login-hint">Enter admin key to view messages</p>
+          <input type="password" id="admin-key-input" class="text-input" placeholder="Admin key" maxlength="64">
+          <button class="menu-btn black-btn" onclick="Admin.login()">Unlock</button>
+          <p class="auth-error" id="admin-error"></p>
+        </div>
+      </div>
+      <div id="admin-messages-section" style="display:none">
+        <div id="admin-messages-list" class="admin-messages-list">
+          <div class="lb-loading">Loading...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══════ CONTACT MODAL ═══════ -->
   <div class="overlay" id="contact-overlay">
     <div class="overlay-card">
@@ -464,6 +489,72 @@
   UI.hideContact = () => {
     document.getElementById('contact-overlay').classList.remove('active');
     document.getElementById('contact-error').textContent = '';
+  };
+
+  // ── Admin Panel ──
+  const Admin = {
+    key: null,
+
+    async login() {
+      const key = document.getElementById('admin-key-input').value.trim();
+      const errorEl = document.getElementById('admin-error');
+      errorEl.textContent = '';
+
+      if (!key) { errorEl.textContent = 'Enter the admin key'; return; }
+
+      try {
+        const res = await fetch('/api/admin/contact', {
+          headers: { 'X-Admin-Key': key }
+        });
+        if (!res.ok) {
+          errorEl.textContent = 'Invalid admin key';
+          return;
+        }
+        this.key = key;
+        document.getElementById('admin-login-section').style.display = 'none';
+        document.getElementById('admin-messages-section').style.display = 'block';
+        this.loadMessages();
+      } catch (err) {
+        errorEl.textContent = 'Network error';
+      }
+    },
+
+    async loadMessages() {
+      const listEl = document.getElementById('admin-messages-list');
+      listEl.innerHTML = '<div class="lb-loading">Loading...</div>';
+
+      try {
+        const res = await fetch('/api/admin/contact', {
+          headers: { 'X-Admin-Key': this.key }
+        });
+        const messages = await res.json();
+
+        if (!messages.length) {
+          listEl.innerHTML = '<div class="lb-loading">No messages yet</div>';
+          return;
+        }
+
+        listEl.innerHTML = messages.map(m => `
+          <div class="admin-msg-card">
+            <div class="admin-msg-header">
+              <strong>${this._esc(m.name)}</strong>
+              <span class="admin-msg-date">${new Date(m.created_at).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</span>
+            </div>
+            <div class="admin-msg-email">${this._esc(m.email)}</div>
+            ${m.subject ? '<div class="admin-msg-subject">' + this._esc(m.subject) + '</div>' : ''}
+            <div class="admin-msg-body">${this._esc(m.message)}</div>
+          </div>
+        `).join('');
+      } catch (err) {
+        listEl.innerHTML = '<div class="lb-loading">Failed to load messages</div>';
+      }
+    },
+
+    _esc(str) {
+      const el = document.createElement('span');
+      el.textContent = str;
+      return el.innerHTML;
+    }
   };
   </script>
 </body>

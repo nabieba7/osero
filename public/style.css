@@ -1412,3 +1412,62 @@ body {
   min-height: 1.2em;
   margin: 0.25rem 0;
 }
+
+/* ═══════ ADMIN MESSAGES ═══════ */
+.admin-login-card {
+  max-width: 400px;
+  margin: 2rem auto;
+  text-align: center;
+}
+
+.admin-login-hint {
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.admin-messages-list {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.admin-msg-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.admin-msg-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.admin-msg-date {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.admin-msg-email {
+  color: var(--accent);
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+}
+
+.admin-msg-subject {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.admin-msg-body {
+  color: var(--text-main);
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.5;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--card-border);
+}
