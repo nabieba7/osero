@@ -124,7 +124,6 @@
 
       <button class="rules-btn" onclick="UI.showRules()">❓ Rules</button>
       <button class="rules-btn" onclick="UI.showContact()" style="margin-left:0.5rem">✉️ Contact</button>
-      <button class="rules-btn" onclick="UI.showScreen('admin-screen')" style="margin-left:0.5rem;font-size:0.8rem">⚙️</button>
       <button class="theme-toggle-menu" onclick="UI.toggleTheme()">🌙 Theme</button>
 
       <div class="menu-section">
@@ -556,6 +555,15 @@
       return el.innerHTML;
     }
   };
+
+  // ── Hash routing for admin page ──
+  function checkHash() {
+    if (window.location.hash === '#admin') {
+      UI.showScreen('admin-screen');
+    }
+  }
+  window.addEventListener('hashchange', checkHash);
+  checkHash();
   </script>
 </body>
 </html>
