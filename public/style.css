@@ -1391,3 +1391,24 @@ body {
   color: #fff;
   border-color: #5a7cff;
 }
+/* ═══════ CONTACT FORM ═══════ */
+.contact-subtitle {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.contact-textarea {
+  min-height: 120px;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.contact-error {
+  color: #e74c3c;
+  font-size: 0.85rem;
+  min-height: 1.2em;
+  margin: 0.25rem 0;
+}

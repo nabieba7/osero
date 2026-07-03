@@ -123,6 +123,7 @@
       </div>
 
       <button class="rules-btn" onclick="UI.showRules()">❓ Rules</button>
+      <button class="rules-btn" onclick="UI.showContact()" style="margin-left:0.5rem">✉️ Contact</button>
       <button class="theme-toggle-menu" onclick="UI.toggleTheme()">🌙 Theme</button>
 
       <div class="menu-section">
@@ -386,8 +387,84 @@
     </div>
   </div>
 
+  <!-- ═══════ CONTACT MODAL ═══════ -->
+  <div class="overlay" id="contact-overlay">
+    <div class="overlay-card">
+      <h2>✉️ Contact Us</h2>
+      <p class="contact-subtitle">Found a bug? Have a suggestion? We'd love to hear from you.</p>
+      <input type="text" id="contact-name" class="text-input" placeholder="Your name" maxlength="50">
+      <input type="email" id="contact-email" class="text-input" placeholder="Your email" maxlength="100">
+      <input type="text" id="contact-subject" class="text-input" placeholder="Subject (optional)" maxlength="100">
+      <textarea id="contact-message" class="text-input contact-textarea" placeholder="Your message..." maxlength="2000"></textarea>
+      <p class="contact-error" id="contact-error"></p>
+      <button class="menu-btn black-btn" onclick="Contact.send()" id="contact-btn">Send Message</button>
+      <button class="menu-btn local-btn" onclick="UI.hideContact()" style="margin-top:0.5rem;background:transparent;border-color:var(--card-border)">Cancel</button>
+    </div>
+  </div>
+
   <script src="/socket.io/socket.io.js"></script>
   <script src="auth.js?v=4"></script>
   <script src="game.js?v=4"></script>
+  <script>
+  const Contact = {
+    async send() {
+      const name = document.getElementById('contact-name').value.trim();
+      const email = document.getElementById('contact-email').value.trim();
+      const subject = document.getElementById('contact-subject').value.trim();
+      const message = document.getElementById('contact-message').value.trim();
+      const errorEl = document.getElementById('contact-error');
+      const btn = document.getElementById('contact-btn');
+
+      errorEl.textContent = '';
+
+      if (!name) { errorEl.textContent = 'Please enter your name'; return; }
+      if (!email || !email.includes('@')) { errorEl.textContent = 'Please enter a valid email'; return; }
+      if (!message) { errorEl.textContent = 'Please enter a message'; return; }
+
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+
+      try {
+        const res = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, subject, message })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          errorEl.textContent = data.error || 'Something went wrong';
+          btn.disabled = false;
+          btn.textContent = 'Send Message';
+          return;
+        }
+        // Success
+        document.getElementById('contact-name').value = '';
+        document.getElementById('contact-email').value = '';
+        document.getElementById('contact-subject').value = '';
+        document.getElementById('contact-message').value = '';
+        btn.textContent = '✓ Sent!';
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.textContent = 'Send Message';
+          UI.hideContact();
+        }, 1200);
+      } catch (err) {
+        errorEl.textContent = 'Network error. Try again.';
+        btn.disabled = false;
+        btn.textContent = 'Send Message';
+      }
+    }
+  };
+
+  // Add UI methods for contact modal
+  const _origShowScreen = UI.showScreen.bind(UI);
+  UI.showContact = () => {
+    document.getElementById('contact-overlay').classList.add('active');
+  };
+  UI.hideContact = () => {
+    document.getElementById('contact-overlay').classList.remove('active');
+    document.getElementById('contact-error').textContent = '';
+  };
+  </script>
 </body>
 </html>

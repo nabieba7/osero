@@ -6,7 +6,7 @@ const { authMiddleware, requireAuth, hashPassword, verifyPassword, generateToken
 const {
   db, createUser, getUserByUsername, getUserById, updateUserProfile,
  saveGame, getUserStats, getUserRecentGames, getUserGameHistory, getUserGameCount,
- getLeaderboard, getUserRank
+ getLeaderboard, getUserRank, saveContactMessage, getContactMessages
 } = require('./db');
 
 const app = express();
@@ -263,6 +263,43 @@ app.get('/api/leaderboard/me', authMiddleware, (req, res) => {
   const rankRow = getUserRank.get(req.user.id);
   const stats = getUserStats.get(req.user.id);
   res.json({ ...stats, rank: rankRow ? rankRow.rank : null });
+});
+
+// ── Contact Form API ──
+app.post('/api/contact', (req, res) => {
+  const rateKey = 'contact:' + (req.ip || 'unknown');
+  if (rateLimiter.check(rateKey)) {
+    return res.status(429).json({ error: 'Too many messages. Try again later.' });
+  }
+
+  const { name, email, subject, message } = req.body;
+  if (!name || !name.trim()) {
+    return res.status(400).json({ error: 'Name is required' });
+  }
+  if (!email || !email.trim() || !email.includes('@')) {
+    return res.status(400).json({ error: 'Valid email is required' });
+  }
+  if (!message || !message.trim()) {
+    return res.status(400).json({ error: 'Message is required' });
+  }
+  if (message.length > 2000) {
+    return res.status(400).json({ error: 'Message too long (max 2000 characters)' });
+  }
+
+  try {
+    saveContactMessage.run(name.trim(), email.trim(), (subject || '').trim(), message.trim());
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Failed to save contact message:', err);
+    res.status(500).json({ error: 'Failed to send message' });
+  }
+});
+
+// Admin: view contact messages
+app.get('/api/admin/contact', requireAdmin, (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit) || 50, 200);
+  const messages = getContactMessages.all(limit);
+  res.json(messages);
 });
 
 // SPA fallback

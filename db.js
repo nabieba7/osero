@@ -109,6 +109,29 @@ const getLeaderboard = db.prepare(`
   LIMIT ?
 `);
 
+// ── Contact Messages ──
+db.exec(`
+  CREATE TABLE IF NOT EXISTS contact_messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    subject TEXT DEFAULT '',
+    message TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_contact_created ON contact_messages(created_at DESC);
+`);
+
+const saveContactMessage = db.prepare(`
+  INSERT INTO contact_messages (name, email, subject, message)
+  VALUES (?, ?, ?, ?)
+`);
+
+const getContactMessages = db.prepare(`
+  SELECT * FROM contact_messages ORDER BY created_at DESC LIMIT ?
+`);
+
 const getUserRank = db.prepare(`
   SELECT rank FROM (
     SELECT u.id, RANK() OVER (ORDER BY
@@ -135,5 +158,7 @@ module.exports = {
   getUserGameHistory,
   getUserGameCount,
   getLeaderboard,
-  getUserRank
+  getUserRank,
+  saveContactMessage,
+  getContactMessages
 };
