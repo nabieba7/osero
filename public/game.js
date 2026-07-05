@@ -1204,6 +1204,54 @@ const Game = {
 
     UI.showGameOver(bc, wc, result);
   },
+
+  endGameOnline(blackCount, whiteCount) {
+    stopTimer();
+    let result;
+    const duration = Math.round((Date.now() - gameStartTime) / 1000);
+
+    if (blackCount > whiteCount) {
+      result = 'Black wins!';
+      SFX.win();
+    } else if (whiteCount > blackCount) {
+      result = 'White wins!';
+      SFX.win();
+    } else {
+      result = "It's a draw!";
+      SFX.draw();
+    }
+
+    // Play loss sound if player lost
+    const myCount = OnlineGame.myColor === BLACK ? blackCount : whiteCount;
+    const oppCount = OnlineGame.myColor === BLACK ? whiteCount : blackCount;
+    if (myCount < oppCount) SFX.lose();
+
+    // Save game result for both players
+    if (Auth.isLoggedIn()) {
+      const isBlack = OnlineGame.myColor === BLACK;
+      const myScore = isBlack ? blackCount : whiteCount;
+      const oppScore = isBlack ? whiteCount : blackCount;
+      let saveResult;
+      if (myScore > oppScore) saveResult = 'win';
+      else if (myScore < oppScore) saveResult = 'loss';
+      else saveResult = 'draw';
+
+      Auth.saveGameResult(
+        'online',
+        isBlack ? 'black' : 'white',
+        saveResult,
+        myScore,
+        oppScore,
+        null,
+        OnlineGame.myNickname || 'Opponent',
+        duration
+      );
+    } else {
+      document.getElementById('save-hint').style.display = 'block';
+    }
+
+    UI.showGameOver(blackCount, whiteCount, result);
+  },
 };
 const OnlineGame = {
   socket: null,
